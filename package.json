@@ -1,10 +1,16 @@
 {
   "name": "telegram-login-vercel",
   "version": "1.0.0",
+  "description": "Telegram login system for Vercel",
+  "main": "api/login.js",
   "scripts": {
-    "start": "vercel dev"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "telegram": "^2.26.22"
+    "telegram": "^2.13.1",
+    "input": "^1.0.1"
+  },
+  "engines": {
+    "node": ">=14.x"
   }
 }
