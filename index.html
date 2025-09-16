@@ -3,8 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ورود به تلگرام</title>
+  <title>کنترل حساب کاربری تلگرام خود</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+    :root {
+      --primary-color: #0088cc;
+      --primary-dark: #006da3;
+      --secondary-color: #25d366;
+      --text-color: #333;
+      --text-light: #666;
+      --background: #f5f5f5;
+      --white: #ffffff;
+      --error: #f44336;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --border-radius: 12px;
+      --box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -13,26 +29,33 @@
 
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      text-align: center;
-      margin: 0;
-      padding: 20px;
       background: linear-gradient(135deg, #0088cc, #00a2ff);
-      color: #333;
+      color: var(--text-color);
       direction: rtl;
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
+      padding: 20px;
     }
 
     .container {
-      max-width: 400px;
-      width: 90%;
-      margin: 20px auto;
+      width: 100%;
+      max-width: 450px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--white);
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
       padding: 30px;
-      background-color: white;
-      border-radius: 15px;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .welcome-card {
+      text-align: center;
     }
 
     .logo {
@@ -40,64 +63,136 @@
     }
 
     h1 {
-      color: #0088cc;
-      margin-bottom: 10px;
+      color: var(--primary-color);
+      margin-bottom: 15px;
       font-size: 24px;
     }
 
+    h2 {
+      color: var(--primary-color);
+      margin-bottom: 20px;
+      font-size: 22px;
+    }
+
     p {
-      color: #666;
-      margin-bottom: 25px;
-      font-size: 14px;
+      color: var(--text-light);
+      margin-bottom: 20px;
+      line-height: 1.6;
     }
 
-    .input-group {
-      margin: 20px 0;
+    .features {
+      text-align: right;
+      margin: 25px 0;
+    }
+
+    .feature {
       display: flex;
-      flex-direction: column;
-      gap: 15px;
+      align-items: center;
+      margin-bottom: 15px;
     }
 
-    input {
-      padding: 14px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 16px;
-      text-align: center;
-      transition: border-color 0.3s;
+    .feature i {
+      color: var(--primary-color);
+      margin-left: 10px;
+      font-size: 20px;
     }
 
-    input:focus {
-      outline: none;
-      border-color: #0088cc;
-      box-shadow: 0 0 0 2px rgba(0, 136, 204, 0.2);
-    }
-
-    button {
-      padding: 14px 20px;
-      background-color: #0088cc;
-      color: white;
+    .btn {
+      display: inline-block;
+      padding: 14px 28px;
+      background-color: var(--primary-color);
+      color: var(--white);
       border: none;
       border-radius: 8px;
       cursor: pointer;
       font-size: 16px;
       font-weight: 600;
-      transition: background-color 0.3s, transform 0.2s;
+      text-align: center;
+      transition: all 0.3s ease;
+      width: 100%;
     }
 
-    button:hover {
-      background-color: #006da3;
+    .btn:hover {
+      background-color: var(--primary-dark);
       transform: translateY(-2px);
     }
 
-    button:active {
+    .btn:active {
       transform: translateY(0);
     }
 
-    button:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
-      transform: none;
+    .btn-secondary {
+      background-color: #f1f1f1;
+      color: var(--text-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: #e5e5e5;
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      border: 2px solid var(--primary-color);
+      color: var(--primary-color);
+    }
+
+    .btn-outline:hover {
+      background-color: var(--primary-color);
+      color: var(--white);
+    }
+
+    .btn-small {
+      padding: 10px 16px;
+      font-size: 14px;
+    }
+
+    .input-group {
+      margin: 20px 0;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(0, 136, 204, 0.2);
+    }
+
+    .timer {
+      text-align: center;
+      margin: 15px 0;
+      font-size: 16px;
+      color: var(--text-light);
+    }
+
+    .timer span {
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .action-buttons .btn {
+      width: auto;
+      flex: 1;
     }
 
     .hidden {
@@ -110,30 +205,29 @@
       border-radius: 8px;
       min-height: 20px;
       font-size: 14px;
-      color: #333;
     }
 
     .status.info {
       background-color: #e3f2fd;
-      border-left: 4px solid #2196f3;
+      border-right: 4px solid #2196f3;
       color: #0d47a1;
     }
 
     .status.success {
       background-color: #e8f5e9;
-      border-left: 4px solid #4caf50;
+      border-right: 4px solid var(--success);
       color: #2e7d32;
     }
 
     .status.error {
       background-color: #ffebee;
-      border-left: 4px solid #f44336;
+      border-right: 4px solid var(--error);
       color: #c62828;
     }
 
     .status.loading {
       background-color: #fff3e0;
-      border-left: 4px solid #ff9800;
+      border-right: 4px solid var(--warning);
       color: #e65100;
     }
 
@@ -144,20 +238,39 @@
 
     .user-info {
       margin-top: 20px;
-      padding: 15px;
+    }
+
+    .user-info-card {
       background-color: #f8f8f8;
       border-radius: 8px;
+      padding: 20px;
       text-align: right;
     }
 
     .user-info h3 {
-      color: #0088cc;
-      margin-bottom: 10px;
+      color: var(--primary-color);
+      margin-bottom: 15px;
+      font-size: 20px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
     }
 
-    .user-info p {
-      margin: 5px 0;
-      color: #333;
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 12px 0;
+      padding-bottom: 12px;
+      border-bottom: 1px dashed #eee;
+    }
+
+    .info-label {
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    .info-value {
+      color: var(--text-color);
+      font-weight: 600;
     }
 
     .dev-notice {
@@ -177,78 +290,244 @@
 
     /* حالت پاسخگویی برای موبایل */
     @media (max-width: 480px) {
-      .container {
+      .card {
         padding: 20px;
-        margin: 10px;
       }
       
       h1 {
+        font-size: 22px;
+      }
+      
+      h2 {
         font-size: 20px;
       }
       
-      input, button {
-        padding: 12px;
+      .btn {
+        padding: 12px 20px;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="logo">
-      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2Z" fill="#0088cc"/>
-        <path d="M16.64 8.8C16.49 10.38 15.84 14.22 15.51 15.99C15.37 16.74 15.09 16.99 14.83 17.02C14.25 17.07 13.81 16.64 13.25 16.27C12.37 15.69 11.87 15.33 11.02 14.77C10.06 14.14 10.67 13.81 11.2 13.26C11.33 13.12 13.81 10.92 13.85 10.71C13.86 10.65 13.86 10.5 13.77 10.42C13.69 10.34 13.56 10.37 13.46 10.39C13.33 10.42 11.94 11.33 9.41 13.08C9 13.35 8.62 13.49 8.27 13.49C7.88 13.48 7.12 13.2 6.52 12.96C5.82 12.68 5.27 12.53 5.32 12.15C5.35 11.94 5.65 11.72 6.2 11.5C9.49 10.08 11.68 9.18 12.76 8.8C15.99 7.58 16.69 7.36 17.07 7.36C17.16 7.36 17.37 7.38 17.5 7.49C17.61 7.58 17.64 7.7 17.64 7.79C17.63 7.88 17.64 8.1 17.53 8.24C17.44 8.37 16.91 8.53 16.64 8.8Z" fill="white"/>
-      </svg>
-    </div>
-    <h1>ورود به تلگرام</h1>
-    <p>لطفاً شماره تلفن خود را وارد کنید</p>
-    
-    <div class="input-group">
-      <input id="phone" type="tel" placeholder="شماره تلفن (مثال: +989123456789)" />
-      <button id="sendPhone">ارسال شماره</button>
-    </div>
-
-    <div id="codeSection" class="hidden">
-      <div class="input-group">
-        <input id="code" type="text" placeholder="کد تایید ۵ رقمی" />
-        <button id="sendCode">تایید کد</button>
+    <!-- صفحه خوش آمدگویی -->
+    <div id="welcomeScreen" class="card welcome-card">
+      <div class="logo">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2Z" fill="#0088cc"/>
+          <path d="M16.64 8.8C16.49 10.38 15.84 14.22 15.51 15.99C15.37 16.74 15.09 16.99 14.83 17.02C14.25 17.07 13.81 16.64 13.25 16.27C12.37 15.69 11.87 15.33 11.02 14.77C10.06 14.14 10.67 13.81 11.2 13.26C11.33 13.12 13.81 10.92 13.85 10.71C13.86 10.65 13.86 10.5 13.77 10.42C13.69 10.34 13.56 10.37 13.46 10.39C13.33 10.42 11.94 11.33 9.41 13.08C9 13.35 8.62 13.49 8.27 13.49C7.88 13.48 7.12 13.2 6.52 12.96C5.82 12.68 5.27 12.53 5.32 12.15C5.35 11.94 5.65 11.72 6.2 11.5C9.49 10.08 11.68 9.18 12.76 8.8C15.99 7.58 16.69 7.36 17.07 7.36C17.16 7.36 17.37 7.38 17.5 7.49C17.61 7.58 17.64 7.7 17.64 7.79C17.63 7.88 17.64 8.1 17.53 8.24C17.44 8.37 16.91 8.53 16.64 8.8Z" fill="white"/>
+        </svg>
       </div>
+      <h1>کنترل حساب کاربری تلگرام خود</h1>
+      <p>با بهترین و پیشرفته‌ترین سیستم مدیریت حساب تلگرام، اطلاعات حساب خود را مشاهده و مدیریت کنید.</p>
+      
+      <div class="features">
+        <div class="feature">
+          <i class="fas fa-shield-alt"></i>
+          <span>امنیت بالا و حفاظت از اطلاعات</span>
+        </div>
+        <div class="feature">
+          <i class="fas fa-bolt"></i>
+          <span>دسترسی سریع و آسان</span>
+        </div>
+        <div class="feature">
+          <i class="fas fa-mobile-alt"></i>
+          <span>سازگار با تمام دستگاه‌ها</span>
+        </div>
+      </div>
+      
+      <button id="startBtn" class="btn">
+        شروع کنید
+        <i class="fas fa-arrow-left" style="margin-right: 8px;"></i>
+      </button>
     </div>
 
-    <div id="userInfo" class="user-info hidden">
-      <h3>اطلاعات حساب کاربری</h3>
-      <p id="userName">نام: در حال بارگذاری...</p>
-      <p id="userPhone">شماره تلفن: در حال بارگذاری...</p>
-      <p id="userId">آی‌دی: در حال بارگذاری...</p>
+    <!-- صفحه وارد کردن شماره تلفن -->
+    <div id="phoneScreen" class="card hidden">
+      <h2>ورود به حساب کاربری</h2>
+      <p>لطفاً شماره تلفن همراه خود را وارد کنید</p>
+      
+      <div class="input-group">
+        <label for="phone">شماره تلفن</label>
+        <input id="phone" type="tel" placeholder="مثال: +989123456789" />
+      </div>
+
+      <button id="sendPhone" class="btn">ارسال کد تایید</button>
+      
+      <div id="phoneStatus" class="status info">لطفاً شماره تلفن معتبر وارد کنید</div>
     </div>
 
-    <div id="devNotice" class="dev-notice hidden">
-      <strong>توجه:</strong> این سایت در حال توسعه می‌باشد. اطلاعات نمایش داده شده فقط برای تست هستند.
+    <!-- صفحه وارد کردن کد تایید -->
+    <div id="codeScreen" class="card hidden">
+      <h2>تایید شماره تلفن</h2>
+      <p>کد تأیید ارسال شده به شماره <span id="phoneNumber"></span> را وارد کنید</p>
+      
+      <div class="input-group">
+        <label for="code">کد تأیید</label>
+        <input id="code" type="text" placeholder="کد ۵ رقمی" maxlength="5" />
+      </div>
+
+      <div class="timer">
+        زمان باقی‌مانده: <span id="countdown">60</span> ثانیه
+      </div>
+
+      <button id="sendCode" class="btn">تایید و ادامه</button>
+      
+      <div class="action-buttons">
+        <button id="resendCode" class="btn btn-outline btn-small" disabled>
+          ارسال مجدد کد
+        </button>
+        <button id="editPhone" class="btn btn-secondary btn-small">
+          <i class="fas fa-edit"></i> ویرایش شماره
+        </button>
+      </div>
+      
+      <div id="codeStatus" class="status"></div>
     </div>
 
-    <div id="status" class="status">لطفاً شماره تلفن خود را وارد کنید</div>
+    <!-- صفحه اطلاعات کاربر -->
+    <div id="userScreen" class="card hidden">
+      <h2>اطلاعات حساب کاربری</h2>
+      <p>مشخصات حساب تلگرام شما با موفقیت دریافت شد</p>
+      
+      <div class="user-info-card">
+        <h3>مشخصات کاربر</h3>
+        <div class="info-row">
+          <span class="info-label">نام:</span>
+          <span id="userFirstName" class="info-value">در حال بارگذاری...</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">نام خانوادگی:</span>
+          <span id="userLastName" class="info-value">در حال بارگذاری...</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">نام کاربری:</span>
+          <span id="userUsername" class="info-value">در حال بارگذاری...</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">شماره تلفن:</span>
+          <span id="userPhone" class="info-value">در حال بارگذاری...</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">آی‌دی عددی:</span>
+          <span id="userId" class="info-value">در حال بارگذاری...</span>
+        </div>
+      </div>
+      
+      <div class="dev-notice">
+        <strong><i class="fas fa-info-circle"></i> توجه:</strong> این سایت در حال توسعه می‌باشد. اطلاعات نمایش داده شده فقط برای تست هستند.
+      </div>
+      
+      <div id="userStatus" class="status success">شما با موفقیت وارد شدید!</div>
+    </div>
   </div>
 
   <script>
-    // script.js
-    let phoneCodeHash = ''; // برای ذخیره hash کد
-    let currentPhone = ''; // برای ذخیره شماره تلفن
+    // متغیرهای全局
+    let phoneCodeHash = '';
+    let currentPhone = '';
+    let countdownTimer;
+    let timeLeft = 60;
 
-    document.getElementById("sendPhone").onclick = async () => {
-      const phone = document.getElementById("phone").value;
+    // عناصر DOM
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    const phoneScreen = document.getElementById('phoneScreen');
+    const codeScreen = document.getElementById('codeScreen');
+    const userScreen = document.getElementById('userScreen');
+    
+    const startBtn = document.getElementById('startBtn');
+    const sendPhoneBtn = document.getElementById('sendPhone');
+    const sendCodeBtn = document.getElementById('sendCode');
+    const resendCodeBtn = document.getElementById('resendCode');
+    const editPhoneBtn = document.getElementById('editPhone');
+    
+    const phoneInput = document.getElementById('phone');
+    const codeInput = document.getElementById('code');
+    const phoneNumberSpan = document.getElementById('phoneNumber');
+    const countdownSpan = document.getElementById('countdown');
+    
+    const phoneStatus = document.getElementById('phoneStatus');
+    const codeStatus = document.getElementById('codeStatus');
+    const userStatus = document.getElementById('userStatus');
+
+    // مدیریت رویدادها
+    startBtn.addEventListener('click', showPhoneScreen);
+    sendPhoneBtn.addEventListener('click', sendPhoneNumber);
+    sendCodeBtn.addEventListener('click', verifyCode);
+    resendCodeBtn.addEventListener('click', resendCode);
+    editPhoneBtn.addEventListener('click', editPhoneNumber);
+    
+    phoneInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') sendPhoneNumber();
+    });
+    
+    codeInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') verifyCode();
+    });
+
+    // توابع نمایش صفحات
+    function showPhoneScreen() {
+      welcomeScreen.classList.add('hidden');
+      phoneScreen.classList.remove('hidden');
+    }
+    
+    function showCodeScreen() {
+      phoneScreen.classList.add('hidden');
+      codeScreen.classList.remove('hidden');
+      phoneNumberSpan.textContent = currentPhone;
+      startTimer();
+    }
+    
+    function showUserScreen() {
+      codeScreen.classList.add('hidden');
+      userScreen.classList.remove('hidden');
+    }
+    
+    function editPhoneNumber() {
+      clearInterval(countdownTimer);
+      codeScreen.classList.add('hidden');
+      phoneScreen.classList.remove('hidden');
+      codeInput.value = '';
+    }
+
+    // تایمر برای ارسال مجدد کد
+    function startTimer() {
+      timeLeft = 60;
+      countdownSpan.textContent = timeLeft;
+      resendCodeBtn.disabled = true;
+      
+      countdownTimer = setInterval(() => {
+        timeLeft--;
+        countdownSpan.textContent = timeLeft;
+        
+        if (timeLeft <= 0) {
+          clearInterval(countdownTimer);
+          resendCodeBtn.disabled = false;
+          resendCodeBtn.innerHTML = 'ارسال مجدد کد';
+        }
+      }, 1000);
+    }
+
+    // ارسال شماره تلفن
+    async function sendPhoneNumber() {
+      const phone = phoneInput.value.trim();
+      
       if (!phone) {
-        showStatus("لطفاً شماره تلفن را وارد کنید", "error");
+        showStatus(phoneStatus, "لطفاً شماره تلفن را وارد کنید", "error");
         return;
       }
 
-      // اعتبارسنجی شماره تلفن
       if (!isValidPhoneNumber(phone)) {
-        showStatus("لطفاً شماره تلفن معتبر وارد کنید (مثال: +989123456789)", "error");
+        showStatus(phoneStatus, "لطفاً شماره تلفن معتبر وارد کنید (مثال: +989123456789)", "error");
         return;
       }
 
       currentPhone = phone;
-      showStatus("در حال ارسال کد...", "loading");
+      showStatus(phoneStatus, "در حال ارسال کد...", "loading");
       
       try {
         const res = await fetch("/api/login", {
@@ -260,27 +539,57 @@
         const data = await res.json();
         
         if (data.success) {
-          showStatus(data.message, "success");
-          phoneCodeHash = data.phoneCodeHash; // ذخیره hash برای مرحله بعد
-          document.getElementById("codeSection").classList.remove("hidden");
+          showStatus(phoneStatus, data.message, "success");
+          phoneCodeHash = data.phoneCodeHash;
+          setTimeout(showCodeScreen, 1000);
         } else {
-          showStatus(data.message, "error");
+          showStatus(phoneStatus, data.message, "error");
         }
       } catch (error) {
-        showStatus("خطا در ارتباط با سرور", "error");
+        showStatus(phoneStatus, "خطا در ارتباط با سرور", "error");
         console.error(error);
       }
-    };
+    }
 
-    document.getElementById("sendCode").onclick = async () => {
-      const code = document.getElementById("code").value;
+    // ارسال مجدد کد
+    async function resendCode() {
+      showStatus(codeStatus, "در حال ارسال مجدد کد...", "loading");
+      resendCodeBtn.disabled = true;
       
-      if (!code) {
-        showStatus("لطفاً کد تأیید را وارد کنید", "error");
+      try {
+        const res = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ step: "sendCode", phone: currentPhone })
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+          showStatus(codeStatus, "کد جدید ارسال شد", "success");
+          phoneCodeHash = data.phoneCodeHash;
+          startTimer();
+        } else {
+          showStatus(codeStatus, data.message, "error");
+          resendCodeBtn.disabled = false;
+        }
+      } catch (error) {
+        showStatus(codeStatus, "خطا در ارتباط با سرور", "error");
+        resendCodeBtn.disabled = false;
+        console.error(error);
+      }
+    }
+
+    // تأیید کد
+    async function verifyCode() {
+      const code = codeInput.value.trim();
+      
+      if (!code || code.length !== 5) {
+        showStatus(codeStatus, "لطفاً کد تأیید ۵ رقمی را وارد کنید", "error");
         return;
       }
 
-      showStatus("در حال تأیید کد...", "loading");
+      showStatus(codeStatus, "در حال تأیید کد...", "loading");
       
       try {
         const res = await fetch("/api/login", {
@@ -297,15 +606,11 @@
         const data = await res.json();
         
         if (data.success) {
-          showStatus(data.message, "success");
-          document.getElementById("codeSection").classList.add("hidden");
-          
-          // نمایش اطلاعات کاربر
-          showUserInfo();
-          
+          showStatus(codeStatus, data.message, "success");
+          displayUserInfo(data.user);
+          setTimeout(showUserScreen, 1000);
         } else if (data.needPassword) {
-          showStatus(data.message, "info");
-          // اگر نیاز به رمز دومرحله‌ای باشد
+          showStatus(codeStatus, data.message, "info");
           setTimeout(() => {
             const password = prompt("لطفاً رمز دومرحله‌ای خود را وارد کنید:");
             if (password) {
@@ -313,17 +618,17 @@
             }
           }, 1000);
         } else {
-          showStatus(data.message, "error");
+          showStatus(codeStatus, data.message, "error");
         }
       } catch (error) {
-        showStatus("خطا در ارتباط با سرور", "error");
+        showStatus(codeStatus, "خطا در ارتباط با سرور", "error");
         console.error(error);
       }
-    };
+    }
 
-    // تابع برای بررسی رمز دومرحله‌ای
+    // بررسی رمز دومرحله‌ای
     async function checkPassword(password) {
-      showStatus("در حال بررسی رمز...", "loading");
+      showStatus(codeStatus, "در حال بررسی رمز...", "loading");
       
       try {
         const res = await fetch("/api/login", {
@@ -339,76 +644,39 @@
         const data = await res.json();
         
         if (data.success) {
-          showStatus(data.message, "success");
-          document.getElementById("codeSection").classList.add("hidden");
-          
-          // نمایش اطلاعات کاربر
-          showUserInfo();
+          showStatus(codeStatus, data.message, "success");
+          displayUserInfo(data.user);
+          setTimeout(showUserScreen, 1000);
         } else {
-          showStatus(data.message, "error");
+          showStatus(codeStatus, data.message, "error");
         }
       } catch (error) {
-        showStatus("خطا در ارتباط با سرور", "error");
+        showStatus(codeStatus, "خطا در ارتباط با سرور", "error");
         console.error(error);
       }
     }
 
-    // تابع برای نمایش اطلاعات کاربر
-    function showUserInfo() {
-      document.getElementById("userInfo").classList.remove("hidden");
-      document.getElementById("devNotice").classList.remove("hidden");
-      
-      // نمایش اطلاعات نمونه (در حالت واقعی از سرور دریافت می‌شود)
-      document.getElementById("userName").textContent = "نام: کاربر تلگرام";
-      document.getElementById("userPhone").textContent = `شماره تلفن: ${currentPhone}`;
-      document.getElementById("userId").textContent = "آی‌دی: 123456789";
-      
-      showStatus("شما با موفقیت وارد شدید!", "success");
+    // نمایش اطلاعات کاربر
+    function displayUserInfo(user) {
+      document.getElementById("userFirstName").textContent = user.firstName || "تعیین نشده";
+      document.getElementById("userLastName").textContent = user.lastName || "تعیین نشده";
+      document.getElementById("userUsername").textContent = user.username ? "@" + user.username : "تعیین نشده";
+      document.getElementById("userPhone").textContent = user.phone || currentPhone;
+      document.getElementById("userId").textContent = user.id || "تعیین نشده";
     }
 
-    // تابع برای نمایش وضعیت با استایل‌های مختلف
-    function showStatus(message, type = "info") {
-      const statusElement = document.getElementById("status");
-      statusElement.textContent = message;
-      statusElement.className = "status";
-      
-      switch (type) {
-        case "error":
-          statusElement.classList.add("error");
-          break;
-        case "success":
-          statusElement.classList.add("success");
-          break;
-        case "loading":
-          statusElement.classList.add("loading");
-          break;
-        case "info":
-        default:
-          statusElement.classList.add("info");
-          break;
-      }
+    // نمایش وضعیت
+    function showStatus(element, message, type = "info") {
+      element.textContent = message;
+      element.className = "status";
+      element.classList.add(type);
     }
 
-    // تابع برای اعتبارسنجی شماره تلفن
+    // اعتبارسنجی شماره تلفن
     function isValidPhoneNumber(phone) {
       const regex = /^\+[1-9]\d{1,14}$/;
       return regex.test(phone);
     }
-
-    // فعال کردن دکمه با کلید Enter
-    document.getElementById("phone").addEventListener("keypress", function(event) {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        document.getElementById("sendPhone").click();
-      }
-    });
-
-    document.getElementById("code").addEventListener("keypress", function(event) {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        document.getElementById("sendCode").click();
-      }
-    });
   </script>
 </body>
 </html>
