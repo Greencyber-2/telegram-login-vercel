@@ -1,4 +1,3 @@
-// api/login.js
 const { TelegramClient } = require("telegram");
 const { StringSession } = require("telegram/sessions");
 const input = require("input"); // این کتابخانه در محیط سرور کار نمی‌کند
@@ -7,8 +6,7 @@ const input = require("input"); // این کتابخانه در محیط سرو�
 const apiId = 20456083;
 const apiHash = '16db2b0cdd40db7c91511ca151115af5';
 
-// ذخیره موقت sessionها - در محیط سرورless این روش مناسب نیست
-// در تولید واقعی باید از یک دیتابیس استفاده کنید
+// ذخیره موقت sessionها
 const sessions = {};
 
 module.exports = async (req, res) => {
@@ -18,7 +16,7 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { step, phone, code, password } = req.body;
+    const { step, phone, code, password, phoneCodeHash } = req.body;
 
     if (!phone) {
       return res.status(400).json({ success: false, message: "شماره تلفن لازم است" });
@@ -30,6 +28,9 @@ module.exports = async (req, res) => {
       sessions[phone] = new TelegramClient(stringSession, apiId, apiHash, {
         connectionRetries: 5,
       });
+      
+      // اتصال کلاینت
+      await sessions[phone].connect();
     }
 
     const client = sessions[phone];
@@ -37,7 +38,7 @@ module.exports = async (req, res) => {
     if (step === "sendCode") {
       // ارسال کد تأیید
       const result = await client.sendCode(phone, {
-        forceSMS: false, // اگر می‌خواهید فقط SMS ارسال شود true کنید
+        forceSMS: false,
       });
       
       return res.status(200).json({ 
@@ -57,7 +58,7 @@ module.exports = async (req, res) => {
         await client.signIn({
           phoneNumber: phone,
           phoneCode: code,
-          phoneCodeHash: req.body.phoneCodeHash // این مقدار باید از مرحله قبل ذخیره شده باشد
+          phoneCodeHash: phoneCodeHash
         });
         
         return res.status(200).json({ success: true, message: "ورود موفق بود" });
