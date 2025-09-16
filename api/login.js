@@ -1,15 +1,24 @@
 const { TelegramClient } = require("telegram");
 const { StringSession } = require("telegram/sessions");
-const input = require("input"); // این کتابخانه در محیط سرور کار نمی‌کند
 
-// اطلاعات API شما - اینها را از my.telegram.org دریافت کنید
+// اطلاعات API - این مقادیر باید از my.telegram.org دریافت شوند
 const apiId = 20456083;
 const apiHash = '16db2b0cdd40db7c91511ca151115af5';
 
-// ذخیره موقت sessionها
+// ذخیره sessionها - در محیط production از دیتابیس استفاده کنید
 const sessions = {};
 
 module.exports = async (req, res) => {
+  // تنظیم هدر برای CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
+  // مدیریت درخواست‌های OPTIONS برای CORS
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   // فقط درخواست‌های POST را پردازش کن
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Method Not Allowed" });
@@ -71,19 +80,36 @@ module.exports = async (req, res) => {
             needPassword: true 
           });
         }
-        throw error;
+        
+        // خطاهای دیگر
+        console.error("Verify code error:", error);
+        return res.status(400).json({ 
+          success: false, 
+          message: error.message || "خطا در تأیید کد" 
+        });
       }
     }
 
     if (step === "checkPassword" && password) {
-      // بررسی رمز دومرحله‌ای
-      await client.checkPassword(password);
-      return res.status(200).json({ success: true, message: "ورود موفق بود" });
+      try {
+        // بررسی رمز دومرحله‌ای
+        await client.checkPassword(password);
+        return res.status(200).json({ success: true, message: "ورود موفق بود" });
+      } catch (error) {
+        console.error("Password check error:", error);
+        return res.status(400).json({ 
+          success: false, 
+          message: error.message || "رمز دومرحله‌ای نامعتبر" 
+        });
+      }
     }
 
     return res.status(400).json({ success: false, message: "درخواست نامعتبر" });
   } catch (err) {
     console.error("Error in login API:", err);
-    return res.status(500).json({ success: false, message: err.message || "خطای سرور" });
+    return res.status(500).json({ 
+      success: false, 
+      message: err.message || "خطای سرور داخلی" 
+    });
   }
 };
