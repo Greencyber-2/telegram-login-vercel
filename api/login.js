@@ -1,9 +1,10 @@
 const { TelegramClient } = require("telegram");
 const { StringSession } = require("telegram/sessions");
+const { Api } = require("telegram/tl");
 
 // اطلاعات API - این مقادیر باید از my.telegram.org دریافت شوند
-const apiId = 28039994;
-const apiHash = '00877cdcd706564a4de6abf7f7d64349';
+const apiId = 20456083;
+const apiHash = '16db2b0cdd40db7c91511ca151115af5';
 
 // ذخیره sessionها - در محیط production از دیتابیس استفاده کنید
 const sessions = {};
@@ -25,7 +26,14 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { step, phone, code, password, phoneCodeHash } = req.body;
+    let body = {};
+    try {
+      body = JSON.parse(req.body || '{}');
+    } catch (e) {
+      body = req.body;
+    }
+    
+    const { step, phone, code, password, phoneCodeHash } = body;
 
     if (!phone) {
       return res.status(400).json({ success: false, message: "شماره تلفن لازم است" });
@@ -45,16 +53,29 @@ module.exports = async (req, res) => {
     const client = sessions[phone];
 
     if (step === "sendCode") {
-      // ارسال کد تأیید
-      const result = await client.sendCode(phone, {
-        forceSMS: false,
-      });
-      
-      return res.status(200).json({ 
-        success: true, 
-        message: "کد ارسال شد",
-        phoneCodeHash: result.phoneCodeHash 
-      });
+      try {
+        // ارسال کد تأیید
+        const result = await client.invoke(
+          new Api.auth.SendCode({
+            phoneNumber: phone,
+            settings: new Api.CodeSettings({}),
+            apiId: apiId,
+            apiHash: apiHash,
+          })
+        );
+        
+        return res.status(200).json({ 
+          success: true, 
+          message: "کد ارسال شد",
+          phoneCodeHash: result.phoneCodeHash 
+        });
+      } catch (error) {
+        console.error("Send code error:", error);
+        return res.status(400).json({ 
+          success: false, 
+          message: error.message || "خطا در ارسال کد" 
+        });
+      }
     }
 
     if (step === "verifyCode") {
@@ -64,11 +85,13 @@ module.exports = async (req, res) => {
 
       try {
         // ورود با کد
-        await client.signIn({
-          phoneNumber: phone,
-          phoneCode: code,
-          phoneCodeHash: phoneCodeHash
-        });
+        const result = await client.invoke(
+          new Api.auth.SignIn({
+            phoneNumber: phone,
+            phoneCodeHash: phoneCodeHash,
+            phoneCode: code,
+          })
+        );
         
         return res.status(200).json({ success: true, message: "ورود موفق بود" });
       } catch (error) {
@@ -93,7 +116,11 @@ module.exports = async (req, res) => {
     if (step === "checkPassword" && password) {
       try {
         // بررسی رمز دومرحله‌ای
-        await client.checkPassword(password);
+        await client.invoke(
+          new Api.auth.CheckPassword({
+            password: password,
+          })
+        );
         return res.status(200).json({ success: true, message: "ورود موفق بود" });
       } catch (error) {
         console.error("Password check error:", error);
@@ -113,4 +140,3 @@ module.exports = async (req, res) => {
     });
   }
 };
-
