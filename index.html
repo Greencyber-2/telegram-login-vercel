@@ -445,9 +445,18 @@
           <span id="userUsername" class="info-value">در حال بارگذاری...</span>
         </div>
         <div class="info-row">
-          <span class="info-label">شیدی عددی:</span>
+          <span class="info-label">شماره تلفن:</span>
+          <span id="userPhone" class="info-value">در حال بارگذاری...</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">آیدی عددی:</span>
           <span id="userId" class="info-value">در حال بارگذاری...</span>
         </div>
+      </div>
+      
+      <div class="dev-notice">
+        <i class="fas fa-tools"></i>
+        <strong>در حال توسعه:</strong> این برنامه در حال توسعه است و قابلیت‌های بیشتری به زودی اضافه خواهد شد.
       </div>
       
       <div class="dashboard-actions">
@@ -619,7 +628,9 @@
           
           // ذخیره session
           sessionId = data.sessionId;
-          localStorage.setItem('telegram_session_id', sessionId);
+          if (sessionId) {
+            localStorage.setItem('telegram_session_id', sessionId);
+          }
           
           // نمایش اطلاعات کاربر
           displayUserInfo(data.user);
@@ -661,7 +672,9 @@
           
           // ذخیره session
           sessionId = data.sessionId;
-          localStorage.setItem('telegram_session_id', sessionId);
+          if (sessionId) {
+            localStorage.setItem('telegram_session_id', sessionId);
+          }
           
           // نمایش اطلاعات کاربر
           displayUserInfo(data.user);
@@ -708,7 +721,7 @@
       showScreen('userScreen');
       
       try {
-        const response = await fetch('/api/check-session', {
+        const response = await fetch('/api/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -721,62 +734,61 @@
         const data = await response.json();
         
         if (data.success) {
-          updateStatus('userStatus', 'شما با موفقیت وارد شده‌اید', 'success');
+          updateStatus('userStatus', data.message, 'success');
           displayUserInfo(data.user);
         } else {
-          updateStatus('userStatus', data.message, 'error');
-          localStorage.removeItem('telegram_session_id');
-          sessionId = null;
+          updateStatus('userStatus', 'لطفاً مجدداً وارد شوید', 'error');
           showScreen('phoneScreen');
         }
       } catch (error) {
         console.error('Error checking session:', error);
-        updateStatus('userStatus', 'خطا در بررسی وضعیت ورود', 'error');
+        updateStatus('userStatus', 'خطا در بررسی وضعیت ورود. لطفاً دوباره امتحان کنید.', 'error');
+        showScreen('phoneScreen');
       }
     }
 
     // خروج از حساب
     async function logout() {
-      updateStatus('userStatus', 'در حال خروج...', 'loading');
-      
       try {
-        const response = await fetch('/api/logout', {
+        // حذ session از localStorage
+        localStorage.removeItem('telegram_session_id');
+        sessionId = null;
+        
+        // ارسال درخواست حذف session به سرور
+        await fetch('/api/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            action: 'logout',
             sessionId: sessionId
           })
         });
         
-        const data = await response.json();
-        
-        if (data.success) {
-          localStorage.removeItem('telegram_session_id');
-          sessionId = null;
-          updateStatus('userStatus', 'خروج موفقیت‌آمیز بود', 'success');
-          setTimeout(() => {
-            showScreen('phoneScreen');
-          }, 1500);
-        } else {
-          updateStatus('userStatus', data.message, 'error');
-        }
+        // بازگشت به صفحه اول
+        showScreen('welcomeScreen');
       } catch (error) {
         console.error('Error logging out:', error);
-        updateStatus('userStatus', 'خطا در خروج', 'error');
+        // حتی در صورت خطا، کاربر را به صفحه اول بازگردان
+        localStorage.removeItem('telegram_session_id');
+        sessionId = null;
+        showScreen('welcomeScreen');
       }
     }
 
-    // نمایش صفحه مورد نظر
+    // نمایش صفحه مورد نظر و مخفی کردن بقیه
     function showScreen(screenId) {
-      // مخفی کردن تمام صفحات
-      document.querySelectorAll('.card').forEach(card => {
-        card.classList.add('hidden');
-      });
+      const screens = ['welcomeScreen', 'phoneScreen', 'codeScreen', 'passwordScreen', 'userScreen'];
       
-      // نمایش صفحه درخواستی
-      document.getElementById(screenId).classList.remove('hidden');
+      screens.forEach(screen => {
+        const element = document.getElementById(screen);
+        if (screen === screenId) {
+          element.classList.remove('hidden');
+        } else {
+          element.classList.add('hidden');
+        }
+      });
     }
 
     // به‌روزرسانی وضعیت
