@@ -2,8 +2,8 @@ const { TelegramClient } = require("telegram");
 const { StringSession } = require("telegram/sessions");
 
 // اطلاعات API - این مقادیر باید از my.telegram.org دریافت شوند
-const apiId = 20456083;
-const apiHash = '16db2b0cdd40db7c91511ca151115af5';
+const apiId = 28039994;
+const apiHash = '00877cdcd706564a4de6abf7f7d64349';
 
 // ذخیره sessionها - در محیط production از دیتابیس استفاده کنید
 const sessions = {};
@@ -113,3 +113,4 @@ module.exports = async (req, res) => {
     });
   }
 };
+
