@@ -1,9 +1,15 @@
 /* style.css */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   text-align: center;
   margin: 0;
-  padding: 0;
+  padding: 20px;
   background: linear-gradient(135deg, #0088cc, #00a2ff);
   color: #333;
   direction: rtl;
@@ -80,6 +86,12 @@ button:hover {
 
 button:active {
   transform: translateY(0);
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .hidden {
