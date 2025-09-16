@@ -73,7 +73,9 @@ module.exports = async (req, res) => {
         console.error("Send code error:", error);
         return res.status(400).json({ 
           success: false, 
-          message: error.errorMessage || "خطا در ارسال کد تأیید" 
+          message: error.errorMessage === "PHONE_NUMBER_INVALID" 
+            ? "شماره تلفن نامعتبر است" 
+            : "خطا در ارسال کد تأیید. لطفاً دوباره尝试 کنید." 
         });
       }
     }
@@ -112,16 +114,24 @@ module.exports = async (req, res) => {
         if (error.errorMessage === 'SESSION_PASSWORD_NEEDED') {
           return res.status(200).json({ 
             success: false, 
-            message: "حساب شما دارای رمز دومرحله‌ای است",
+            message: "حساب شما دارای رمز دومرحله‌ای است. لطفاً رمز خود را وارد کنید.",
             needPassword: true 
           });
         }
         
         // خطاهای دیگر
         console.error("Verify code error:", error);
+        let errorMessage = "خطا در تأیید کد. لطفاً دوباره尝试 کنید.";
+        
+        if (error.errorMessage === "PHONE_CODE_INVALID") {
+          errorMessage = "کد تأیید نامعتبر است.";
+        } else if (error.errorMessage === "PHONE_CODE_EXPIRED") {
+          errorMessage = "کد تأیید منقضی شده است. لطفاً کد جدیدی دریافت کنید.";
+        }
+        
         return res.status(400).json({ 
           success: false, 
-          message: error.errorMessage || "خطا در تأیید کد. لطفاً دوباره尝试 کنید." 
+          message: errorMessage
         });
       }
     }
@@ -153,7 +163,9 @@ module.exports = async (req, res) => {
         console.error("Password check error:", error);
         return res.status(400).json({ 
           success: false, 
-          message: error.errorMessage || "رمز دومرحله‌ای نامعتبر است" 
+          message: error.errorMessage === "PASSWORD_HASH_INVALID" 
+            ? "رمز دومرحله‌ای نامعتبر است" 
+            : "خطا در بررسی رمز. لطفاً دوباره尝试 کنید."
         });
       }
     }
