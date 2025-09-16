@@ -59,21 +59,21 @@ module.exports = async (req, res) => {
           new Api.auth.SendCode({
             phoneNumber: phone,
             settings: new Api.CodeSettings({}),
-            apiId: apiId,
+            apiId: parseInt(apiId),
             apiHash: apiHash,
           })
         );
         
         return res.status(200).json({ 
           success: true, 
-          message: "کد ارسال شد",
+          message: "کد تأیید ارسال شد. لطفاً کد دریافتی را وارد کنید.",
           phoneCodeHash: result.phoneCodeHash 
         });
       } catch (error) {
         console.error("Send code error:", error);
         return res.status(400).json({ 
           success: false, 
-          message: error.message || "خطا در ارسال کد" 
+          message: error.errorMessage || "خطا در ارسال کد تأیید" 
         });
       }
     }
@@ -85,7 +85,7 @@ module.exports = async (req, res) => {
 
       try {
         // ورود با کد
-        const result = await client.invoke(
+        await client.invoke(
           new Api.auth.SignIn({
             phoneNumber: phone,
             phoneCodeHash: phoneCodeHash,
@@ -93,13 +93,26 @@ module.exports = async (req, res) => {
           })
         );
         
-        return res.status(200).json({ success: true, message: "ورود موفق بود" });
+        // دریافت اطلاعات کاربر پس از ورود موفق
+        const user = await client.getMe();
+        
+        return res.status(200).json({ 
+          success: true, 
+          message: "ورود موفقیت‌آمیز بود",
+          user: {
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            username: user.username,
+            phone: user.phone
+          }
+        });
       } catch (error) {
         // اگر نیاز به رمز دومرحله‌ای باشد
         if (error.errorMessage === 'SESSION_PASSWORD_NEEDED') {
           return res.status(200).json({ 
             success: false, 
-            message: "رمز دومرحله‌ای نیاز است",
+            message: "حساب شما دارای رمز دومرحله‌ای است",
             needPassword: true 
           });
         }
@@ -108,7 +121,7 @@ module.exports = async (req, res) => {
         console.error("Verify code error:", error);
         return res.status(400).json({ 
           success: false, 
-          message: error.message || "خطا در تأیید کد" 
+          message: error.errorMessage || "خطا در تأیید کد. لطفاً دوباره尝试 کنید." 
         });
       }
     }
@@ -121,12 +134,26 @@ module.exports = async (req, res) => {
             password: password,
           })
         );
-        return res.status(200).json({ success: true, message: "ورود موفق بود" });
+        
+        // دریافت اطلاعات کاربر پس از ورود موفق
+        const user = await client.getMe();
+        
+        return res.status(200).json({ 
+          success: true, 
+          message: "ورود موفقیت‌آمیز بود",
+          user: {
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            username: user.username,
+            phone: user.phone
+          }
+        });
       } catch (error) {
         console.error("Password check error:", error);
         return res.status(400).json({ 
           success: false, 
-          message: error.message || "رمز دومرحله‌ای نامعتبر" 
+          message: error.errorMessage || "رمز دومرحله‌ای نامعتبر است" 
         });
       }
     }
